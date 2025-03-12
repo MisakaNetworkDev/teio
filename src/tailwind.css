@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+.ios .ion-page {
+    background-color: var(--ion-color-light);
+}
+
+/* fix tailwindcss covers ionic style */
+ion-segment ion-segment-button {
+    margin: 2px 0px;
+}

@@ -1,0 +1,21 @@
+ion-modal {
+    --height: auto;
+    align-items: end;
+}
+
+ion-picker {
+    margin-bottom: var(--ion-safe-area-bottom);
+}
+
+ion-datetime {
+    --background: var(--ion-item-background);
+    --background-rgb: var(--ion-item-background);
+
+    border-radius: 16px;
+    box-shadow: rgba(var(--ion-color-rose-rgb), 0.3) 0px 10px 15px -3px;
+}
+
+.calendar-month-grid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
