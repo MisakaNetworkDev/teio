@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-.ios .ion-page {
+.ios>.ion-page {
     background-color: var(--ion-color-light);
 }
 

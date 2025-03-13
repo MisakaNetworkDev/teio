@@ -5,13 +5,15 @@ export enum Gender {
 }
 
 export interface UserProfile {
-    user_name: string;
-    nick_name: string;
-    avatar_url: string;
-    gender: Gender;
+    user_name: string,
+    nick_name: string,
+    avatar_url: string | null,
+    gender: Gender,
+    join_time: number,
 }
 
 export interface TokenInfo {
     token: string,
-    expire_at: bigint,
+    user_id: string,
+    expire_at: number,
 }

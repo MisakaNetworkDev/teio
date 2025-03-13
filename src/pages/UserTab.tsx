@@ -1,50 +1,70 @@
-import { IonAvatar, IonButton, IonContent, IonItem, IonLabel, IonList, IonPage, useIonViewWillEnter } from '@ionic/react';
-import avatar from '../mocks/images/avatar.jpg'
+import { IonAvatar, IonButton, IonContent, IonItem, IonLabel, IonList, IonPage, useIonRouter, useIonViewWillEnter } from '@ionic/react';
 import { useState } from 'react';
 import ListIcon from '../components/ListIcon'
-import { seiunClient, UserModule } from '../api';
+import { Gender, seiunClient, UserModule, UserProfile } from '../api';
+import { Dialog } from '@capacitor/dialog';
 
-interface DataCardProps {
-  // bgFrom: string,
-  // bgTo: string,
-  title: string,
-  value: string | number
-}
+// interface DataCardProps {
+//   // bgFrom: string,
+//   // bgTo: string,
+//   title: string,
+//   value: string | number
+// }
 
-const DataCard = (props: DataCardProps) => {
-  return (
-    <div className='w-full px-3 py-2.5 flex flex-col justify-center'>
-      <div className='flex flex-row justify-center'>
-        <p className='text-2xl font-bold'>{props.value}</p>
-      </div>
-      <div className='flex flex-row justify-center'>
-        <p className='text-[var(--text-light)]'>{props.title}</p>
-      </div>
-    </div>
-  )
-}
+// const DataCard = (props: DataCardProps) => {
+//   return (
+//     <div className='w-full px-3 py-2.5 flex flex-col justify-center'>
+//       <div className='flex flex-row justify-center'>
+//         <p className='text-2xl font-bold'>{props.value}</p>
+//       </div>
+//       <div className='flex flex-row justify-center'>
+//         <p className='text-[var(--text-light)]'>{props.title}</p>
+//       </div>
+//     </div>
+//   )
+// }
 
 const UserTab: React.FC = () => {
-  const [userInfo, setUserInfo] = useState({
-    avatarUrl: avatar,
-    nickName: "白芷 WhitePaper",
-    userName: "WhitePaper233",
-    totalWords: 4527,
-    totalDays: 245,
-    rank: 235,
-    joinTime: 1740388519,
+  const ionRouter = useIonRouter();
+  const userModule = new UserModule(seiunClient);
+
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    avatar_url: '/avatars/default.png',
+    nick_name: "",
+    user_name: "",
+    join_time: 0,
+    gender: Gender.unknown,
   })
 
 
   useIonViewWillEnter(() => {
-    const userModule = new UserModule(seiunClient);
-    const fetchUser = async () => {
-      const userProfile = await userModule.getUserProfile('019585d0-c999-7255-81d8-7839baac74e2');
-      console.log(userProfile);
-      const tokens = await userModule.loginViaPhone('13851906027', 'bbbA123456');
-      console.log(tokens);
+    const fetchUserInfo = async () => {
+      const userId = seiunClient.getUserId();
+      if (!userId) {
+        await Dialog.alert({
+          title: "登录信息错误",
+          message: "请重新登录！",
+        });
+        ionRouter.push("/login", "root");
+        return;
+      }
+
+      try {
+        const profile = await userModule.getUserProfile(userId);
+        setUserProfile(profile);
+      } catch (err) {
+        const error_message = (err as Error).message;
+        console.error(error_message);
+        const dialogOption = {
+          title: "获取用户信息失败",
+          message: error_message,
+        }
+        await Dialog.alert(dialogOption);
+        return;
+      }
     }
-    fetchUser();
+
+    fetchUserInfo();
   })
 
   const dateFormater = new Intl.DateTimeFormat('zh-CN', {
@@ -58,15 +78,15 @@ const UserTab: React.FC = () => {
         <div className='w-full'>
           <div className='px-4 pt-6'>
             <IonAvatar class='mx-auto w-20 mt-12 mb-12'>
-              <img src={userInfo.avatarUrl} alt="user_avatar" />
+              <img src={userProfile.avatar_url ?? '/avatars/default.png'} alt="user_avatar" />
             </IonAvatar>
             <div className='flex flex-row justify-center'>
-              <span className='text-2xl font-bold'>{userInfo.nickName}</span>
+              <span className='text-2xl font-bold'>{userProfile.nick_name}</span>
             </div>
             <div className='flex flex-row justify-center mt-1.5'>
-              <span className='text-lg text-[var(--text-light)]'>@{userInfo.userName}</span>
+              <span className='text-lg text-[var(--text-light)]'>@{userProfile.user_name}</span>
               <span className='text-lg mx-1 text-[var(--text-light)]'>·</span>
-              <span className='text-lg text-[var(--text-light)]'>{dateFormater.format(userInfo.joinTime * 1000).replaceAll('/', ' ')} 加入</span>
+              <span className='text-lg text-[var(--text-light)]'>{dateFormater.format(userProfile.join_time * 1000).replaceAll('/', ' ')} 加入</span>
             </div>
             {/* <div className='grid grid-cols-3 mx-auto mt-2 divide-x-1 divide-[var(--divide-color)]'>
               <DataCard title='打卡单词' value={userInfo.totalWords} />

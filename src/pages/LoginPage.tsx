@@ -1,7 +1,9 @@
-import { IonContent, IonHeader, IonInput, IonItem, IonLabel, IonList, IonPage, IonSegment, IonSegmentButton, IonSegmentContent, IonSegmentView, IonTitle, IonToolbar, useIonRouter } from "@ionic/react";
+import { IonContent, IonHeader, IonInput, IonItem, IonLabel, IonList, IonPage, IonSegment, IonSegmentButton, IonSegmentContent, IonSegmentView, IonTitle, IonToolbar, useIonRouter, useIonViewWillEnter } from "@ionic/react";
 import { useState } from "react";
 import { seiunClient, TokenInfo, UserModule } from "../api";
 import { Dialog } from "@capacitor/dialog";
+import { Link } from "react-router-dom";
+import { ScreenOrientation } from '@capacitor/screen-orientation';
 
 const LoginPage: React.FC = () => {
   const [loginMode, setLoginMode] = useState<"phone" | "email" | "username">("phone");
@@ -32,9 +34,9 @@ const LoginPage: React.FC = () => {
         message: "",
       };
       console.error(errorMessage);
-      if (errorMessage == "error.controller.any.param_valid_failed") {
+      if (errorMessage === "error.controller.any.param_valid_failed") {
         dialogOption.message = "用户名、账号、手机号或密码格式错误！";
-      } else if (errorMessage == "error.controller.user.login_failed") {
+      } else if (errorMessage === "error.controller.user.login_failed") {
         dialogOption.message = "账号或密码错误！";
       } else {
         dialogOption.message = errorMessage;
@@ -43,14 +45,21 @@ const LoginPage: React.FC = () => {
     }
 
     if (tokenInfo) {
-      seiunClient.saveToken(tokenInfo.token, tokenInfo.expire_at);
+      seiunClient.saveToken(tokenInfo.token, tokenInfo.user_id, tokenInfo.expire_at);
       await Dialog.alert({
         title: "登录成功",
         message: "开始学习吧！",
       });
-      ionRouter.push('/', 'root');
+      ionRouter.push("/", "none");
     }
   }
+
+  useIonViewWillEnter(() => {
+    // 锁定屏幕旋转
+    ScreenOrientation.lock({
+      orientation: "portrait"
+    })
+  })
 
   return (
     <IonPage>
@@ -132,6 +141,11 @@ const LoginPage: React.FC = () => {
             </IonList>
           </IonSegmentContent>
         </IonSegmentView>
+        <div className="fixed bottom-16 left-1/2 -translate-x-1/2 flex flex-row space-x-5 place-items-center">
+          <Link to='/forgot-password'>忘记密码</Link>
+          <span className="text-[var(--ion-color-medium)]">|</span>
+          <Link to='register'>注册账号</Link>
+        </div>
       </IonContent>
     </IonPage>
   )

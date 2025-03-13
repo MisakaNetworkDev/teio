@@ -23,7 +23,6 @@ import {
   IonDatetimeButton,
   IonDatetime,
 } from '@ionic/react';
-import avatar from '../../mocks/images/avatar.jpg'
 
 import './Profile.css'
 
@@ -33,7 +32,7 @@ const SettingsProfile: React.FC = () => {
   const [grade, setGrade] = useState<string>('其他');
   const [openBirthDaySelection, setOpenBirthDaySelection] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState({
-    avatarUrl: avatar,
+    avatarUrl: "/avatars/default.png",
     nickName: "白芷 WhitePaper",
     userName: "WhitePaper233",
   })

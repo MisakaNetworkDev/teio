@@ -10,6 +10,8 @@ PODS:
     - Capacitor
   - CapacitorKeyboard (7.0.0):
     - Capacitor
+  - CapacitorScreenOrientation (7.0.0):
+    - Capacitor
   - CapacitorStatusBar (7.0.0):
     - Capacitor
 
@@ -20,6 +22,7 @@ DEPENDENCIES:
   - "CapacitorDialog (from `../../node_modules/@capacitor/dialog`)"
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../node_modules/@capacitor/keyboard`)"
+  - "CapacitorScreenOrientation (from `../../node_modules/@capacitor/screen-orientation`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
 
 EXTERNAL SOURCES:
@@ -35,6 +38,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/haptics"
   CapacitorKeyboard:
     :path: "../../node_modules/@capacitor/keyboard"
+  CapacitorScreenOrientation:
+    :path: "../../node_modules/@capacitor/screen-orientation"
   CapacitorStatusBar:
     :path: "../../node_modules/@capacitor/status-bar"
 
@@ -45,8 +50,9 @@ SPEC CHECKSUMS:
   CapacitorDialog: 0c8fcf2de9464df5f28c070c02d5aa0dfd80047a
   CapacitorHaptics: 1fba3e460e7614349c6d5f868b1fccdc5c87b66d
   CapacitorKeyboard: 2c26c6fccde35023c579fc37d4cae6326d5e6343
+  CapacitorScreenOrientation: 4b2778087f4b4b138705cdabe431de0829116974
   CapacitorStatusBar: 438e90beeeefa8276b24e6c5991cb02dd13e51bf
 
-PODFILE CHECKSUM: 4189c1c1c7e1491ff8e91f66eff979982a32247c
+PODFILE CHECKSUM: 1d1a61b4a6b2d8f981c9e2a912b8434cb62cc83d
 
 COCOAPODS: 1.16.2

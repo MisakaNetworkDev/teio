@@ -1,8 +1,7 @@
-import { IonContent, IonHeader, IonNavLink, IonPage, IonProgressBar, IonTitle, IonToolbar, IonRippleEffect, IonButton, useIonRouter } from "@ionic/react"
+import { IonContent, IonHeader, IonNavLink, IonPage, IonProgressBar, IonTitle, IonToolbar, IonRippleEffect, IonButton, useIonRouter, useIonViewWillEnter } from "@ionic/react"
 
 import 'swiper/css';
 import { Icon } from "@iconify/react";
-import { useEffect } from "react";
 import { seiunClient } from "../api";
 
 interface FunctionCardProps {
@@ -29,11 +28,11 @@ const FunctionCard: React.FC<FunctionCardProps> = (props: FunctionCardProps) => 
 
 const LearnTab: React.FC = () => {
   const ionRouter = useIonRouter();
-  useEffect(() => {
+  useIonViewWillEnter(() => {
     if (seiunClient.getToken() === null) {
-      ionRouter.push('/login', 'none');
+      ionRouter.push("/login", "root");
     }
-  }, [])
+  })
 
   return (
     <IonPage>

@@ -1,8 +1,8 @@
 import { Vibrant, WorkerPipeline } from "node-vibrant/worker";
 import PipelineWorker from "node-vibrant/worker.worker?worker";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import clsx from 'clsx';
-import { useIonRouter } from "@ionic/react";
+import { useIonRouter, useIonViewWillEnter } from "@ionic/react";
 
 interface PostCardProps {
   tag: string,
@@ -20,8 +20,8 @@ const PostCard: React.FC<PostCardProps> = (props: PostCardProps) => {
 
   const ionRouter = useIonRouter();
 
-  useEffect(() => {
-    Vibrant.use(new WorkerPipeline(PipelineWorker as never));
+  Vibrant.use(new WorkerPipeline(PipelineWorker as never));
+  useIonViewWillEnter(() => {
     Vibrant.from(props.cover).getPalette().then(palette => {
       const color = palette.Muted?.hex ?? '#FFFFFF';
       setPaletteColor(color);
@@ -29,7 +29,7 @@ const PostCard: React.FC<PostCardProps> = (props: PostCardProps) => {
         background: `linear-gradient(to top, ${color}FF 36%, ${color}00 100%)`
       });
     })
-  }, [props.cover])
+  })
 
   const handleClick = () => {
     ionRouter.push(`/tabbed/article/${props.id}`, "forward");
