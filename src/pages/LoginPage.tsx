@@ -42,15 +42,16 @@ const LoginPage: React.FC = () => {
         dialogOption.message = errorMessage;
       }
       Dialog.alert(dialogOption);
+      return;
     }
 
     if (tokenInfo) {
       seiunClient.saveToken(tokenInfo.token, tokenInfo.user_id, tokenInfo.expire_at);
-      await Dialog.alert({
+      Dialog.alert({
         title: "登录成功",
         message: "开始学习吧！",
       });
-      ionRouter.push("/", "none");
+      ionRouter.push("/tabbed", "root");
     }
   }
 

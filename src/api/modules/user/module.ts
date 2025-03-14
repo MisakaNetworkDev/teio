@@ -1,11 +1,11 @@
-import SeiunClient from "../../core/client";
+import SeiunClient, { AuthFailedCallbackFunction } from "../../core/client";
 import { SeiunModule } from "../../core/modules";
-import { TokenInfo, UserProfile } from "./types";
+import { TokenInfo, UserProfile, UserUpdateProfile } from "./types";
 
 // 用户模块接口
 export class UserModule extends SeiunModule {
-    constructor(client: SeiunClient) {
-        super(client, '/user');
+    constructor(client: SeiunClient, authFailedCallback?: AuthFailedCallbackFunction) {
+        super(client, '/user', authFailedCallback);
     }
 
     // 获取用户信息
@@ -46,6 +46,25 @@ export class UserModule extends SeiunModule {
                 'password': password
             },
             { auth: false },
+        )
+    }
+
+    // 更新用户资料
+    async updateUserProfile(profile: UserUpdateProfile) {
+        return this.patch<void>(
+            '/update-profile',
+            profile,
+        )
+    }
+
+    // 上传用户头像
+    async uploadAvatar(formData: FormData) {
+        return this.post<void>(
+            '/upload-avatar',
+            formData,
+            {
+                jsonData: false,
+            }
         )
     }
 }

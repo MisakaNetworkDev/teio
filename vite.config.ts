@@ -17,6 +17,10 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:5222',
         changeOrigin: true,
+      },
+      '/resources': {
+        target: 'http://localhost:5222',
+        changeOrigin: true,
       }
     }
   }

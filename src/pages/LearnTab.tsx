@@ -30,7 +30,7 @@ const LearnTab: React.FC = () => {
   const ionRouter = useIonRouter();
   useIonViewWillEnter(() => {
     if (seiunClient.getToken() === null) {
-      ionRouter.push("/login", "root");
+      ionRouter.push("/login");
     }
   })
 

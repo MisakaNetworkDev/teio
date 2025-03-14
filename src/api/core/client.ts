@@ -3,6 +3,9 @@
  * Seiun 后端核心 API SDK
  */
 
+// 认证失败回调函数
+type AuthFailedCallbackFunction = () => void | Promise<void>
+
 // API 配置接口
 interface ClientConfig {
     baseUrl: string,
@@ -22,7 +25,7 @@ interface RefreshResponse {
 // 请求选项
 interface RequestOptions extends RequestInit {
     auth?: boolean,
-    skipRefresh?: boolean,
+    jsonData?: boolean,
 }
 
 // 基础相应
@@ -43,6 +46,21 @@ class SeiunClient {
             tokenExpireTimeKey: 'expire_time',
             refreshTokenEndpoint: '/user/refresh-token',
             ...config,
+        }
+
+        // 检查 Token 是否过期
+        if (this.getToken() && this.getExpireTime()) {
+            const expireTime = parseInt(this.getExpireTime()!, 10);
+            const now = Math.floor(Date.now() / 1000);
+            if (expireTime < now) {
+                // 令牌已过期，清除令牌
+                this.clearToken();
+            } else if (expireTime - now < 86400) {
+                // 令牌将在 24 小时内过期，尝试刷新令牌
+                this.refreshToken().catch(() => {
+                    this.clearToken();
+                });
+            }
         }
     }
 
@@ -66,16 +84,16 @@ class SeiunClient {
     }
 
     // 刷新令牌
-    async refreshToken() {
+    async refreshToken(): Promise<void> {
         // 如果已经有刷新请求在进行中，直接返回
         if (this.refreshPromise) {
             return this.refreshPromise;
         }
-        
+
         // 如果没有令牌，直接返回
         const token = this.getToken();
         if (!token) {
-            return Promise.reject(new Error('token_error'));
+            return Promise.reject(new Error('Token not found'));
         }
 
         this.refreshPromise = fetch(`${this.config.baseUrl}${this.config.refreshTokenEndpoint}`, {
@@ -85,13 +103,12 @@ class SeiunClient {
             }
         }).then(response => {
             if (!response.ok) {
-                throw new Error('token_error');
+                throw new Error(response.statusText);
             }
             return response.json();
         }).then(({ data }: { data: RefreshResponse }) => {
             this.saveToken(data.token, data.user_id, data.expire_at);
         }).catch(error => {
-            this.clearToken();
             throw error;
         }).finally(() => {
             this.refreshPromise = null;
@@ -101,38 +118,27 @@ class SeiunClient {
     }
 
     // 核心请求方法
-    async request<T>(endpoint: string, options: RequestOptions): Promise<BaseResponse<T>> {
-        const { auth = true, skipRefresh = false, ...fetchOptions } = options;
+    async request<T>(endpoint: string, options: RequestOptions, authFailedCallback?: AuthFailedCallbackFunction): Promise<BaseResponse<T>> {
+        const { auth = true, jsonData = true, ...fetchOptions } = options;
         const url = `${this.config.baseUrl}${endpoint}`;
-
-        if (!skipRefresh && auth) {
-            // 检查令牌有效期是否小于 24 小时
-            const expireTime = this.getExpireTime();
-            if (expireTime) {
-                const expireTimeNum = parseInt(expireTime, 10);
-                const now = Math.floor(Date.now() / 1000);
-                if (expireTimeNum - now < 86400) {
-                    await this.refreshToken();
-                }
-            } else {
-                this.clearToken();
-                throw new Error('token_error');
-            }
-        }
 
         // 设置请求头
         const headers = new Headers(fetchOptions.headers);
-        // 如果没设置请求类型 且是 POST 或 PUT 请求，默认设置为 application/json
-        if (!headers.has('content-type') && (fetchOptions.method === 'POST' || fetchOptions.method === 'PUT')) {
+        // 如果没设置请求类型 且是 POST PUT PATCH 请求，默认设置为 application/json
+        if (jsonData && (fetchOptions.method === 'POST' || fetchOptions.method === 'PUT' || fetchOptions.method === 'PATCH')) {
             headers.set('content-type', 'application/json');
         }
+
         // 添加认证
-        if (auth) {
+        if (auth !== false) {
             const token = this.getToken();
-            if (token) {
+            if (token !== null) {
                 headers.set('Authorization', `Bearer ${token}`);
             } else {
-                throw new Error('token_error');
+                if (authFailedCallback !== undefined) {
+                    await authFailedCallback();
+                }
+                throw new Error('Token not found');
             }
         }
 
@@ -145,39 +151,59 @@ class SeiunClient {
         // 发送请求
         const response = await fetch(url, requestOptions);
         if (response.status === 401) {
-            this.clearToken();
-            throw new Error('token_error');
+            if (authFailedCallback) {
+                this.clearToken();
+                await authFailedCallback();
+            }
+            throw new Error(response.statusText);
         }
 
         // 处理响应
         const data = await response.json();
         if (!response.ok) {
-            throw new Error(data.message || `Request failed with status ${response.status}`);
+            throw new Error(data.message || `Request failed with status ${response.status}: ${response.statusText}`);
         }
 
         return data as BaseResponse<T>;
     }
 
     // Get 请求
-    async get<T>(endpoint: string, options: RequestOptions = {}): Promise<BaseResponse<T>> {
-        return await this.request<T>(endpoint, { method: 'GET', ...options });
+    async get<T>(endpoint: string, options: RequestOptions = {}, authFailedCallback?: AuthFailedCallbackFunction): Promise<BaseResponse<T>> {
+        return await this.request<T>(endpoint, { method: 'GET', ...options }, authFailedCallback);
     }
 
     // Post 请求
-    async post<T>(endpoint: string, body: any, options: RequestOptions = {}): Promise<BaseResponse<T>> {
-        return await this.request<T>(endpoint, { method: 'POST', body: JSON.stringify(body), ...options });
+    async post<T>(endpoint: string, body: any, options: RequestOptions = {}, authFailedCallback?: AuthFailedCallbackFunction): Promise<BaseResponse<T>> {
+        let bodyData = body;
+        if (options.jsonData) {
+            bodyData = JSON.stringify(body);
+        }
+        return await this.request<T>(endpoint, { method: 'POST', body: bodyData, ...options }, authFailedCallback);
     }
 
     // Put 请求
-    async put<T>(endpoint: string, body: any, options: RequestOptions = {}): Promise<BaseResponse<T>> {
-        return await this.request<T>(endpoint, { method: 'PUT', body: JSON.stringify(body), ...options });
+    async put<T>(endpoint: string, body: any, options: RequestOptions = {}, authFailedCallback?: AuthFailedCallbackFunction): Promise<BaseResponse<T>> {
+        let bodyData = body;
+        if (options.jsonData) {
+            bodyData = JSON.stringify(body);
+        }
+        return await this.request<T>(endpoint, { method: 'PUT', body: bodyData, ...options }, authFailedCallback);
     }
 
     // Delete 请求
-    async delete<T>(endpoint: string, options: RequestOptions = {}): Promise<BaseResponse<T>> {
-        return await this.request<T>(endpoint, { method: 'DELETE', ...options });
+    async delete<T>(endpoint: string, options: RequestOptions = {}, authFailedCallback?: AuthFailedCallbackFunction): Promise<BaseResponse<T>> {
+        return await this.request<T>(endpoint, { method: 'DELETE', ...options }, authFailedCallback);
+    }
+
+    // Patch 请求
+    async patch<T>(endpoint: string, body: any, options: RequestOptions = {}, authFailedCallback?: AuthFailedCallbackFunction): Promise<BaseResponse<T>> {
+        let bodyData = body;
+        if (options.jsonData) {
+            bodyData = JSON.stringify(body);
+        }
+        return await this.request<T>(endpoint, { method: 'PATCH', body: bodyData, ...options }, authFailedCallback);
     }
 }
 
 export default SeiunClient;
-export type { ClientConfig, RequestOptions, BaseResponse };
+export type { ClientConfig, RequestOptions, BaseResponse, AuthFailedCallbackFunction };

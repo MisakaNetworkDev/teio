@@ -54,6 +54,7 @@ const App: React.FC = () => (
         <Route path="/tabbed" render={() => (
           <IonTabs>
             <IonRouterOutlet>
+              <Redirect exact from='/tabbed' to="/tabbed/learn" />
               <Route exact path="/tabbed/learn" component={LearnTab} />
               <Route exact path="/tabbed/user" component={UserTab} />
               <Route exact path="/tabbed/community" component={CommunityTab} />

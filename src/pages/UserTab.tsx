@@ -3,6 +3,7 @@ import { useState } from 'react';
 import ListIcon from '../components/ListIcon'
 import { Gender, seiunClient, UserModule, UserProfile } from '../api';
 import { Dialog } from '@capacitor/dialog';
+import { baseUrl } from '../utils/url';
 
 // interface DataCardProps {
 //   // bgFrom: string,
@@ -34,8 +35,20 @@ const UserTab: React.FC = () => {
     user_name: "",
     join_time: 0,
     gender: Gender.unknown,
+    is_banned: false,
+    description: null,
   })
 
+  const logout = async () => {
+    const result = await Dialog.confirm({
+      title: "退出账号",
+      message: "确认退出当前账号并回到登录页面？"
+    })
+    if (result.value) {
+      seiunClient.clearToken()
+      ionRouter.push("/login");
+    }
+  }
 
   useIonViewWillEnter(() => {
     const fetchUserInfo = async () => {
@@ -45,7 +58,7 @@ const UserTab: React.FC = () => {
           title: "登录信息错误",
           message: "请重新登录！",
         });
-        ionRouter.push("/login", "root");
+        ionRouter.push("/login");
         return;
       }
 
@@ -77,8 +90,8 @@ const UserTab: React.FC = () => {
       <IonContent color='light' fullscreen>
         <div className='w-full'>
           <div className='px-4 pt-6'>
-            <IonAvatar class='mx-auto w-20 mt-12 mb-12'>
-              <img src={userProfile.avatar_url ?? '/avatars/default.png'} alt="user_avatar" />
+            <IonAvatar class='mx-auto w-20 h-20 mt-12 mb-4'>
+              <img className='w-20 h-20' src={userProfile.avatar_url ? `${baseUrl}${userProfile.avatar_url}` : '/avatars/default.png'} alt="user_avatar" />
             </IonAvatar>
             <div className='flex flex-row justify-center'>
               <span className='text-2xl font-bold'>{userProfile.nick_name}</span>
@@ -140,7 +153,7 @@ const UserTab: React.FC = () => {
               </IonItem>
             </IonList>
 
-            <IonButton expand='block' className='mx-4' color='danger'>退出登录</IonButton>
+            <IonButton expand='block' className='mx-4' color='danger' onClick={logout}>退出登录</IonButton>
           </div>
         </div>
       </IonContent>
