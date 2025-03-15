@@ -72,6 +72,7 @@ const CommunityTab: React.FC = () => {
                     id={post.id}
                     cover={post.cover}
                     ai={post.ai}
+                    className="h-[28rem]"
                   />
                   <IonRippleEffect />
                 </SwiperSlide>
@@ -83,6 +84,24 @@ const CommunityTab: React.FC = () => {
           <div className="mt-2 ml-[2px]">
             <p className="text-xl font-semibold">为您推荐</p>
             <p className="text-black/50 font-semibold">社区中当前的热门文章</p>
+          </div>
+          <div className="mt-4 flex flex-col">
+            {
+              posts.map((post, index) => (
+                <SwiperSlide key={index} className="ion-activatable rounded-4xl relative overflow-hidden mt-4">
+                  <PostCard
+                    key={post.id}
+                    title={post.title}
+                    desc={post.desc}
+                    id={post.id}
+                    cover={post.cover}
+                    ai={false}
+                    className="h-[20rem]"
+                  />
+                  <IonRippleEffect />
+                </SwiperSlide>
+              ))
+            }
           </div>
         </div>
       </IonContent>

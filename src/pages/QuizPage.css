@@ -1,0 +1,20 @@
+.option {
+    --background: white;
+    --background-activated: var(--ion-color-light-shade);
+
+    --color: black;
+}
+
+.option-right {
+    --background: #5EC66F;
+    --background-activated: #7ED18C;
+
+    --color: white;
+}
+
+.option-wrong {
+    --background: #DF3562;
+    --background-activated: #E55D81;
+
+    --color: white;
+}

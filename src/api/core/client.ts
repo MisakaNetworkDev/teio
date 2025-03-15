@@ -35,6 +35,26 @@ interface BaseResponse<T = any> {
     data: T
 }
 
+// 认证错误
+class AuthError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'AuthError';
+
+        Object.setPrototypeOf(this, AuthError.prototype);
+    }
+}
+
+// 请求错误
+class RequestError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'RequestError';
+
+        Object.setPrototypeOf(this, RequestError.prototype);
+    }
+}
+
 class SeiunClient {
     private config: ClientConfig;
     private refreshPromise: Promise<void> | null = null;
@@ -93,7 +113,7 @@ class SeiunClient {
         // 如果没有令牌，直接返回
         const token = this.getToken();
         if (!token) {
-            return Promise.reject(new Error('Token not found'));
+            return Promise.reject(new AuthError('Token not found'));
         }
 
         this.refreshPromise = fetch(`${this.config.baseUrl}${this.config.refreshTokenEndpoint}`, {
@@ -103,7 +123,7 @@ class SeiunClient {
             }
         }).then(response => {
             if (!response.ok) {
-                throw new Error(response.statusText);
+                throw new RequestError(response.statusText);
             }
             return response.json();
         }).then(({ data }: { data: RefreshResponse }) => {
@@ -138,7 +158,7 @@ class SeiunClient {
                 if (authFailedCallback !== undefined) {
                     await authFailedCallback();
                 }
-                throw new Error('Token not found');
+                throw new AuthError('Token not found');
             }
         }
 
@@ -147,6 +167,10 @@ class SeiunClient {
             ...fetchOptions,
             headers,
         };
+        // 序列化 JSON 字符串
+        if (jsonData && requestOptions.body) {
+            requestOptions.body = JSON.stringify(requestOptions.body);
+        }
 
         // 发送请求
         const response = await fetch(url, requestOptions);
@@ -155,13 +179,13 @@ class SeiunClient {
                 this.clearToken();
                 await authFailedCallback();
             }
-            throw new Error(response.statusText);
+            throw new AuthError(response.statusText);
         }
 
         // 处理响应
         const data = await response.json();
         if (!response.ok) {
-            throw new Error(data.message || `Request failed with status ${response.status}: ${response.statusText}`);
+            throw new RequestError(data.message || `Request failed with status ${response.status}: ${response.statusText}`);
         }
 
         return data as BaseResponse<T>;
@@ -174,20 +198,12 @@ class SeiunClient {
 
     // Post 请求
     async post<T>(endpoint: string, body: any, options: RequestOptions = {}, authFailedCallback?: AuthFailedCallbackFunction): Promise<BaseResponse<T>> {
-        let bodyData = body;
-        if (options.jsonData) {
-            bodyData = JSON.stringify(body);
-        }
-        return await this.request<T>(endpoint, { method: 'POST', body: bodyData, ...options }, authFailedCallback);
+        return await this.request<T>(endpoint, { method: 'POST', body: body, ...options }, authFailedCallback);
     }
 
     // Put 请求
     async put<T>(endpoint: string, body: any, options: RequestOptions = {}, authFailedCallback?: AuthFailedCallbackFunction): Promise<BaseResponse<T>> {
-        let bodyData = body;
-        if (options.jsonData) {
-            bodyData = JSON.stringify(body);
-        }
-        return await this.request<T>(endpoint, { method: 'PUT', body: bodyData, ...options }, authFailedCallback);
+        return await this.request<T>(endpoint, { method: 'PUT', body: body, ...options }, authFailedCallback);
     }
 
     // Delete 请求
@@ -197,13 +213,10 @@ class SeiunClient {
 
     // Patch 请求
     async patch<T>(endpoint: string, body: any, options: RequestOptions = {}, authFailedCallback?: AuthFailedCallbackFunction): Promise<BaseResponse<T>> {
-        let bodyData = body;
-        if (options.jsonData) {
-            bodyData = JSON.stringify(body);
-        }
-        return await this.request<T>(endpoint, { method: 'PATCH', body: bodyData, ...options }, authFailedCallback);
+        return await this.request<T>(endpoint, { method: 'PATCH', body: body, ...options }, authFailedCallback);
     }
 }
 
 export default SeiunClient;
 export type { ClientConfig, RequestOptions, BaseResponse, AuthFailedCallbackFunction };
+export { AuthError, RequestError };

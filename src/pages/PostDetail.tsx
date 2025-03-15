@@ -1,5 +1,5 @@
 import { IonBackButton, IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, useIonViewDidEnter, useIonViewWillEnter } from '@ionic/react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import example from '../mocks/example_post.json'
 import { useParams } from 'react-router';
 import Markdown from 'react-markdown'
@@ -9,11 +9,7 @@ interface PostDetailParams {
 }
 
 const PostDetail: React.FC = () => {
-  const contentDivRef = useRef<HTMLDivElement>(null);
-  const initialPositionRef = useRef<number | null>(null);
-
   const { id } = useParams<PostDetailParams>();
-  const [loading, setLoading] = useState(true);
   const [article, setArticle] = useState<{
     id: string,
     cover: string,
@@ -23,40 +19,16 @@ const PostDetail: React.FC = () => {
   } | null>(null);
 
   useIonViewWillEnter(() => {
-    setArticle(example);
-    setLoading(false);
+    const articleData = example;
+    setArticle(articleData);
   })
-
-  const [scrollOffset, setScrollOffset] = useState<number>(0);
-  useEffect(() => {
-    const handleScroll = () => {
-      const rect = contentDivRef.current?.getBoundingClientRect();
-      if (rect && initialPositionRef.current !== null) {
-        const offset = initialPositionRef.current - rect.y;
-        setScrollOffset(offset > 0 ? offset : 0);
-        console.log('当前位置:', rect.y, '初始位置:', initialPositionRef.current, '偏移量:', offset);
-      }
-    };
-    window.addEventListener('ionScroll', handleScroll);
-    return () => {
-      window.removeEventListener('ionScroll', handleScroll);
-    };
-  }, []);
-
-  useIonViewDidEnter(() => {
-    if (initialPositionRef.current === null) {
-      const rect = contentDivRef.current?.getBoundingClientRect();
-      const position = rect?.y as number;
-      initialPositionRef.current = position;
-    }
-  });
 
   return (
     <IonPage>
       <IonHeader translucent={true}>
         <IonToolbar>
           <IonButtons slot="start">
-            <IonBackButton defaultHref="/community" text="社区" />
+            <IonBackButton defaultHref="/tabbed/community" text="社区" />
           </IonButtons>
           <IonTitle>
             文章详情
@@ -64,19 +36,19 @@ const PostDetail: React.FC = () => {
         </IonToolbar>
       </IonHeader>
 
-      <IonContent scrollEvents={true} className="bg-transparent">
-        <div className="relative w-full min-h-full">
-          <div
-            className="w-full h-[45vh] bg-cover bg-center fixed top-0 left-0 z-10"
-            style={{ backgroundImage: `url(${article?.cover})`, height: `calc(45vh+${scrollOffset}px)` }}
-          >
+      <IonContent color="light" fullscreen>
+        <div className='flex flex-col space-y-4 ion-padding'>
+          <div className='rounded-2xl h-54 bg-center bg-cover' style={{ backgroundImage: `url(${article?.cover})` }} />
+          <p className='ml-1 text-4xl font-bold'>{article?.title}</p>
+          <div className='flex flex-row'>
+            <span className='flex flex-row w-full justify-end items-center space-x-2'>
+              <img className='rounded-full w-8 h-8' src="/avatars/default.png" alt="avatar" />
+              <p>DeepSeek V3</p>
+            </span>
           </div>
-
-          <div ref={contentDivRef} className="bg-white rounded-t-[25px] px-6 py-6 relative mt-[calc(40vh-25px)] shadow-lg z-20 min-h-[65vh]">
-            <p className="text-3xl font-bold mb-3">{article?.title}</p>
-            <Markdown>{article?.content}</Markdown>
-            <p className="text-gray-500 mt-5 text-sm">文章ID: {id}</p>
-          </div>
+        </div>
+        <div className='bg-white p-6 pl-7 rounded-t-4xl'>
+          <Markdown>{article?.content}</Markdown>
         </div>
       </IonContent>
     </IonPage>

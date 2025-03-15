@@ -59,7 +59,9 @@ const LoginPage: React.FC = () => {
     // 锁定屏幕旋转
     ScreenOrientation.lock({
       orientation: "portrait"
-    })
+    }).catch(err => {
+      console.warn(err);
+    });
   })
 
   return (

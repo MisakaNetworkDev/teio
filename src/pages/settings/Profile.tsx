@@ -33,6 +33,7 @@ import { Dialog } from '@capacitor/dialog';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { photoToFormData } from '../../utils/formData';
 import { baseUrl } from '../../utils/url';
+import { AuthError, RequestError } from '../../api/core/client';
 
 
 const SettingsProfile: React.FC = () => {
@@ -61,13 +62,10 @@ const SettingsProfile: React.FC = () => {
       try {
         userProfile = await userModule.getUserProfile(userId);
       } catch (err) {
-        const error_message = (err as Error).message;
-        if (error_message === "Unauthorized") {
-          return;
-        }
+        if (err instanceof AuthError) return;
         await Dialog.alert({
           title: "请求用户资料错误",
-          message: error_message,
+          message: (err as RequestError).message,
         });
         return;
       }
@@ -96,13 +94,10 @@ const SettingsProfile: React.FC = () => {
         message: "成功更新资料",
       });
     } catch (err) {
-      const error_message = (err as Error).message;
-      if (error_message === "Unauthorized") {
-        return;
-      }
+      if (err instanceof AuthError) return;
       await Dialog.alert({
         title: "更新用户资料错误",
-        message: error_message,
+        message: (err as RequestError).message,
       });
       return;
     }

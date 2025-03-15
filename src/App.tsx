@@ -41,6 +41,7 @@ import './theme/variables.css';
 
 /* Tailwind */
 import './tailwind.css';
+import QuizPage from './pages/QuizPage';
 
 setupIonicReact({
   mode: 'ios',
@@ -77,8 +78,9 @@ const App: React.FC = () => (
             </IonTabBar>
           </IonTabs>
         )} />
-        <Redirect exact from='/' to="/tabbed/learn" />
         <Route exact path="/login" component={LoginPage} />
+        <Route exact path="/quiz/:quizSessionId" component={QuizPage} />
+        <Redirect exact from='/' to="/tabbed/learn" />
 
       </IonRouterOutlet>
     </IonReactRouter>

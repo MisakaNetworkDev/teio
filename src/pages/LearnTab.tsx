@@ -34,6 +34,10 @@ const LearnTab: React.FC = () => {
     }
   })
 
+  const enterQuiz = () => {
+    ionRouter.push(`/quiz/123`, "forward");
+  }
+
   return (
     <IonPage>
       <IonHeader translucent>
@@ -80,7 +84,7 @@ const LearnTab: React.FC = () => {
                 </span>
               </div>
             </div>
-            <IonButton expand="block" className="mt-2">开始学习</IonButton>
+            <IonButton expand="block" className="mt-2" onClick={enterQuiz}>开始学习</IonButton>
           </div>
 
           <div className="mt-4 flex flex-col space-y-4">
