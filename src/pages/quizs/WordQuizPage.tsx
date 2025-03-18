@@ -1,7 +1,7 @@
 import { IonButton, IonContent, IonPage, useIonAlert } from "@ionic/react";
 import { useState } from "react";
 import { useParams } from "react-router";
-import './QuizPage.css'
+import './WordQuizPage.css'
 
 interface QuizPageParams {
   quizSessionId: string

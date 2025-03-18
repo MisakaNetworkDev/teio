@@ -41,7 +41,8 @@ import './theme/variables.css';
 
 /* Tailwind */
 import './tailwind.css';
-import QuizPage from './pages/QuizPage';
+import QuizPage from './pages/quizs/WordQuizPage';
+import FillBlankQuizPage from './views/challenges/ClozeChallenge';
 
 setupIonicReact({
   mode: 'ios',
@@ -52,39 +53,47 @@ const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
       <IonRouterOutlet>
-        <Route path="/tabbed" render={() => (
-          <IonTabs>
-            <IonRouterOutlet>
-              <Redirect exact from='/tabbed' to="/tabbed/learn" />
-              <Route exact path="/tabbed/learn" component={LearnTab} />
-              <Route exact path="/tabbed/user" component={UserTab} />
-              <Route exact path="/tabbed/community" component={CommunityTab} />
-              <Route exact path="/tabbed/article/:id" component={PostDetail} />
-              <Route exact path="/tabbed/settings/profile" component={SettingsProfile} />
-            </IonRouterOutlet>
-            <IonTabBar translucent slot="bottom" className='pb-8 csspt-1'>
-              <IonTabButton tab="learn-tab" href="/tabbed/learn">
-                <IonIcon aria-hidden="true" icon={bookOutline} />
-                <IonLabel>学习</IonLabel>
-              </IonTabButton>
-              <IonTabButton tab="community-tab" href="/tabbed/community">
-                <IonIcon aria-hidden="true" icon={chatbubblesOutline} />
-                <IonLabel>社区</IonLabel>
-              </IonTabButton>
-              <IonTabButton tab='user-tab' href='/tabbed/user'>
-                <IonIcon aria-hidden="true" icon={personOutline} />
-                <IonLabel>我</IonLabel>
-              </IonTabButton>
-            </IonTabBar>
-          </IonTabs>
-        )} />
-        <Route exact path="/login" component={LoginPage} />
-        <Route exact path="/quiz/:quizSessionId" component={QuizPage} />
-        <Redirect exact from='/' to="/tabbed/learn" />
-
+        <Route exact path="/login">
+          <LoginPage />
+        </Route>
+        <Route exact path="/quiz/:quizSessionId">
+          <QuizPage />
+        </Route>
+        <Route exact path="/cloze">
+          <FillBlankQuizPage />
+        </Route>
+        <Route exact path="/">
+          <Redirect to="/tabbed/learn" />
+        </Route>
       </IonRouterOutlet>
+      <Route path="/tabbed">
+        <IonTabs>
+          <IonRouterOutlet>
+            <Redirect exact from='/tabbed' to="/tabbed/learn" />
+            <Route exact path="/tabbed/learn" component={LearnTab} />
+            <Route exact path="/tabbed/user" component={UserTab} />
+            <Route exact path="/tabbed/community" component={CommunityTab} />
+            <Route exact path="/tabbed/article/:id" component={PostDetail} />
+            <Route exact path="/tabbed/settings/profile" component={SettingsProfile} />
+          </IonRouterOutlet>
+          <IonTabBar translucent slot="bottom" className='pb-8 csspt-1'>
+            <IonTabButton tab="learn-tab" href="/tabbed/learn">
+              <IonIcon aria-hidden="true" icon={bookOutline} />
+              <IonLabel>学习</IonLabel>
+            </IonTabButton>
+            <IonTabButton tab="community-tab" href="/tabbed/community">
+              <IonIcon aria-hidden="true" icon={chatbubblesOutline} />
+              <IonLabel>社区</IonLabel>
+            </IonTabButton>
+            <IonTabButton tab='user-tab' href='/tabbed/user'>
+              <IonIcon aria-hidden="true" icon={personOutline} />
+              <IonLabel>我</IonLabel>
+            </IonTabButton>
+          </IonTabBar>
+        </IonTabs>
+      </Route>
     </IonReactRouter>
-  </IonApp>
+  </IonApp >
 );
 
 export default App;

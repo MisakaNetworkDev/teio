@@ -35,7 +35,8 @@ const LearnTab: React.FC = () => {
   })
 
   const enterQuiz = () => {
-    ionRouter.push(`/quiz/123`, "forward");
+    // ionRouter.push(`/quiz/123`, "forward");
+    ionRouter.push(`/wanxing`, "forward");
   }
 
   return (

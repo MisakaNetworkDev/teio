@@ -1,0 +1,113 @@
+{
+    "type": "完形填空",
+    "content": "After spending weeks in {$1}, John felt completely {$2} by his emotions. He had an {$3} to talk to someone, but he still felt {$4} from his friends. To stay {$5}, he decided to take a walk in the park and sit under a {$6}. As he walked, he noticed the {$7} of the birds and the gentle {$8} of the leaves. He took a deep breath and felt a sense of {$9}. However, his mind was still filled with {$10}, making it hard to focus. He knew he needed a {$11} to clear his thoughts. Talking to someone could {$12} his stress, but he was afraid of being {$13}. Instead, he decided to {$14} his feelings in a journal, hoping that writing would help him find {$15}.",
+    "selections": {
+        "1": [
+            "celebration",
+            "isolation",
+            "vacation",
+            "connection"
+        ],
+        "2": [
+            "excited",
+            "overwhelmed",
+            "relaxed",
+            "confused"
+        ],
+        "3": [
+            "urge",
+            "fear",
+            "habit",
+            "thought"
+        ],
+        "4": [
+            "engaged",
+            "supported",
+            "disconnected",
+            "cheerful"
+        ],
+        "5": [
+            "healthy",
+            "tired",
+            "weak",
+            "bored"
+        ],
+        "6": [
+            "building",
+            "tree",
+            "car",
+            "river"
+        ],
+        "7": [
+            "silence",
+            "chatter",
+            "noise",
+            "melody"
+        ],
+        "8": [
+            "movement",
+            "stillness",
+            "rustling",
+            "softness"
+        ],
+        "9": [
+            "peace",
+            "anger",
+            "excitement",
+            "fear"
+        ],
+        "10": [
+            "worries",
+            "dreams",
+            "happiness",
+            "confusion"
+        ],
+        "11": [
+            "break",
+            "schedule",
+            "plan",
+            "job"
+        ],
+        "12": [
+            "increase",
+            "reduce",
+            "double",
+            "create"
+        ],
+        "13": [
+            "understood",
+            "ignored",
+            "appreciated",
+            "noticed"
+        ],
+        "14": [
+            "express",
+            "hide",
+            "forget",
+            "ignore"
+        ],
+        "15": [
+            "chaos",
+            "clarity",
+            "distress",
+            "hesitation"
+        ]
+    },
+    "answers": {
+        "1": "isolation",
+        "2": "overwhelmed",
+        "3": "urge",
+        "4": "disconnected",
+        "5": "healthy",
+        "6": "tree",
+        "7": "chatter",
+        "8": "rustling",
+        "9": "peace",
+        "10": "worries",
+        "11": "break",
+        "12": "reduce",
+        "13": "ignored",
+        "14": "express",
+        "15": "clarity"
+    }
+}
