@@ -1,8 +1,11 @@
 import { IonContent, IonHeader, IonNavLink, IonPage, IonProgressBar, IonTitle, IonToolbar, IonRippleEffect, IonButton, useIonRouter, useIonViewWillEnter } from "@ionic/react"
 
-import 'swiper/css';
 import { Icon } from "@iconify/react";
-import { seiunClient } from "../api";
+import { CurrentPlanData, seiunClient, UserPlanModule } from "../api";
+import { Link } from "react-router-dom";
+import { showTokenInfoMissingDialog } from "../utils/dialogs";
+import { useState } from "react";
+import { AuthError, RequestError } from "../api/core/client";
 
 interface FunctionCardProps {
   title: string,
@@ -28,15 +31,46 @@ const FunctionCard: React.FC<FunctionCardProps> = (props: FunctionCardProps) => 
 
 const LearnTab: React.FC = () => {
   const ionRouter = useIonRouter();
+  const userPlanModule = new UserPlanModule(seiunClient, async () => {
+    ionRouter.push('/login', 'root');
+    await showTokenInfoMissingDialog();
+  });
+
+  const [currentPlan, setCurrentPlan] = useState<CurrentPlanData>({
+    expected_completion_at: 0,
+    learned_count: 0,
+    book_word_count: Infinity,
+    remaining_days: 0,
+    daily_plan: 0,
+    word_book_id: "",
+    word_book_name: "加载中",
+  });
+
   useIonViewWillEnter(() => {
     if (seiunClient.getToken() === null) {
       ionRouter.push("/login");
     }
+
+    const fetchUserPlan = async () => {
+      try {
+        const currentUserPlan = await userPlanModule.getCurrentUserPlan();
+        setCurrentPlan(currentUserPlan);
+      } catch (err) {
+        if (err instanceof AuthError) return;
+        const errorMessage = (err as RequestError).message;
+        if (errorMessage === "error.controller.user_plan.user_plan_not_found") {
+          setCurrentPlan({ ...currentPlan, word_book_name: "未选择" });
+          return;
+        }
+      }
+    }
+
+    fetchUserPlan();
   })
 
   const enterQuiz = () => {
     // ionRouter.push(`/quiz/123`, "forward");
-    ionRouter.push(`/wanxing`, "forward");
+    ionRouter.push("/study-session", "none");
   }
 
   return (
@@ -54,18 +88,22 @@ const LearnTab: React.FC = () => {
             </IonToolbar>
           </IonHeader>
 
-          <IonNavLink routerDirection="forward" component={() => <div></div>}>
+          <Link to="/tabbed/settings/word-book-selection">
             <div className="bg-white rounded-2xl px-3 pt-4 pb-3 mt-2 flex flex-row items-center ion-activatable relative overflow-hidden">
-              <Icon icon="fluent-emoji:blue-book" className="relative -left-1.5" height={73} />
+              <div className="w-18 h-18">
+                <Icon icon="fluent-emoji:blue-book" className="relative -left-1.5" height={72} />
+              </div>
               <div className="flex flex-col grow">
                 <p className="text-black/80">当前计划</p>
-                <p className="text-xl text-black/80 font-bold">英语六级词汇 (CET6)</p>
-                <IonProgressBar class="mt-1.5 mb-1.5" value={0.66}></IonProgressBar>
+                <p className="text-xl text-black/80 font-bold">{currentPlan.word_book_name}</p>
+                <IonProgressBar class="mt-1.5 mb-1.5" value={currentPlan.learned_count / currentPlan.book_word_count}></IonProgressBar>
               </div>
-              <Icon icon="mingcute:right-line" className="text-black/75 ml-3" height={24} />
+              <div className="w-6 ml-3">
+                <Icon icon="mingcute:right-line" className="text-black/75" height={24} />
+              </div>
               <IonRippleEffect />
             </div>
-          </IonNavLink>
+          </Link>
 
           <div className="bg-white rounded-2xl p-5 mt-4 flex flex-col space-y-3">
             <span className="text-xl font-bold px-1">今日计划</span>
@@ -73,15 +111,15 @@ const LearnTab: React.FC = () => {
               <div className="flex flex-col">
                 <span className="text-lg">需新学</span>
                 <span className="flex flex-row space-x-4 items-end mt-1">
-                  <p className="text-5xl font-bold">10</p>
+                  <p className="text-5xl font-bold">{currentPlan.daily_plan}</p>
                   <p className="text-xl font-bold">词</p>
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-lg">需巩固</span>
+                <span className="text-lg">再坚持</span>
                 <span className="flex flex-row space-x-4 items-end mt-1">
-                  <p className="text-5xl font-bold">7</p>
-                  <p className="text-xl font-bold">词</p>
+                  <p className="text-5xl font-bold">{currentPlan.remaining_days}</p>
+                  <p className="text-xl font-bold">天</p>
                 </span>
               </div>
             </div>

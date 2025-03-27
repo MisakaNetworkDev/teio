@@ -1,19 +1,23 @@
 import { IonActionSheet } from "@ionic/react";
 import clsx from "clsx";
-import { useState } from "react";
+import { RefObject, useRef, useState } from "react";
 
 interface ClozeBlankProps {
-  index: string,
+  index: number,
   selections: string[],
   className: string,
-  disabled?: boolean
-  onSelectionChange: (index: string, selection: string) => void,
+  disabled?: boolean,
+  contentRef?: RefObject<HTMLIonContentElement>
+  onSelectionChange: (index: number, selection: string) => void,
 }
 
 const ClozeBlank: React.FC<ClozeBlankProps> = (props: ClozeBlankProps) => {
   const [selection, setSelection] = useState<string | null>(null);
-  const [displayContent, setDisplayContent] = useState<string>(props.index);
+  const [displayContent, setDisplayContent] = useState<number>(props.index);
   const [isOpen, setIsOpen] = useState(false);
+
+  const yOffsetBefore = useRef<number | null>(null);
+
   const actionSheetActions = [
     ...props.selections.map(selection => {
       return {
@@ -32,7 +36,11 @@ const ClozeBlank: React.FC<ClozeBlankProps> = (props: ClozeBlankProps) => {
     }
   ];
 
-  const handleBlankClick = () => {
+  const handleBlankClick = async (e: { pageY: number }) => {
+    if (e.pageY > window.innerHeight / 2 && props.contentRef?.current) {
+      yOffsetBefore.current = (await props.contentRef.current.getScrollElement()).scrollTop;
+      props.contentRef.current.scrollToPoint(0, e.pageY + yOffsetBefore.current - window.innerHeight / 2, 400);
+    }
     const disabled = props.disabled ?? false;
     if (!disabled) {
       setIsOpen(true);
@@ -40,6 +48,10 @@ const ClozeBlank: React.FC<ClozeBlankProps> = (props: ClozeBlankProps) => {
   }
 
   const handleDismiss = (event: { detail: any }) => {
+    if (yOffsetBefore.current !== null) {
+      props.contentRef?.current?.scrollToPoint(0, yOffsetBefore.current, 400);
+      yOffsetBefore.current = null;
+    }
     if (!event.detail.data) return;
     const thisSelection = event.detail.data.selection ?? null;
     if (thisSelection) {

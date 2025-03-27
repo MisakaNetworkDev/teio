@@ -1,37 +1,50 @@
-import { IonContent, IonHeader, IonPage, IonRippleEffect, IonTitle, IonToolbar } from "@ionic/react"
+import { IonContent, IonHeader, IonPage, IonRippleEffect, IonTitle, IonToolbar, useIonRouter, useIonViewWillEnter } from "@ionic/react"
 import { Swiper, SwiperSlide } from 'swiper/react';
 import PostCard from "../components/PostCard";
 import { useState } from "react";
-
+import exmaplePosts from '../mocks/example_post.json'
+import { ArticleModule, seiunClient } from "../api";
 import 'swiper/css';
+import { showTokenInfoMissingDialog } from "../utils/dialogs";
+import { resourceBaseUrl } from "../utils/url";
+
+
+interface PostDetail {
+  id: string;
+  content: string;
+  title: string,
+  desc: string,
+  cover: string,
+}
 
 const CommunityTab: React.FC = () => {
-  const [posts, setPosts] = useState([
-    {
-      tag: "Nature",
-      title: "The Hidden Pathway to Serenity",
-      desc: "A journey through a hidden passage, where the horizon meets the heart\'s longing for peace.",
-      id: "01",
-      cover: "/community/cover1.jpg",
-      ai: true
-    },
-    {
-      tag: "SchoolLife",
-      title: "The First Day of a New Journey",
-      desc: "Three friends stand before their future, their hearts filled with dreams and anticipation.",
-      id: "02",
-      cover: "/community/cover2.jpg",
-      ai: true
-    },
-    {
-      tag: "Imagination",
-      title: "Drifting Between Worlds",
-      desc: "A girl lost in the depths of her imagination, where reality and dreams intertwine like waves in the ocean.",
-      id: "03",
-      cover: "/community/cover3.jpg",
-      ai: true
-    },
-  ])
+  const ionRouter = useIonRouter();
+  const articleModule = new ArticleModule(seiunClient, async () => {
+    ionRouter.push('/login', 'root');
+    await showTokenInfoMissingDialog();
+  });
+
+  const [aiPosts, setAiPosts] = useState(exmaplePosts);
+  const [posts, setPosts] = useState<PostDetail[]>([]);
+
+  useIonViewWillEnter(() => {
+    const fetchPosts = async () => {
+      const articles = await articleModule.getArticleList();
+      const articleDetails = await Promise.all(articles.article_ids?.map(id => {
+        return articleModule.getArticleDetail(id);
+      }));
+      setPosts(articleDetails.map(post => {
+        return {
+          id: post.id,
+          title: post.title,
+          desc: post.description,
+          content: post.article,
+          cover: resourceBaseUrl + "/article-image/" + post.cover_file_name
+        }
+      }))
+    }
+    fetchPosts()
+  })
 
   return (
     <IonPage>
@@ -62,7 +75,7 @@ const CommunityTab: React.FC = () => {
             slidesOffsetBefore={16}
           >
             {
-              posts.map((post, index) => (
+              aiPosts.map((post, index) => (
                 <SwiperSlide key={index} className="!w-[85%] ion-activatable rounded-4xl relative overflow-hidden">
                   <PostCard
                     key={post.id}
@@ -71,7 +84,7 @@ const CommunityTab: React.FC = () => {
                     tag={post.tag}
                     id={post.id}
                     cover={post.cover}
-                    ai={post.ai}
+                    ai={true}
                     className="h-[28rem]"
                   />
                   <IonRippleEffect />

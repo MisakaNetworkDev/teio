@@ -144,10 +144,13 @@ const LoginPage: React.FC = () => {
             </IonList>
           </IonSegmentContent>
         </IonSegmentView>
-        <div className="fixed bottom-16 left-1/2 -translate-x-1/2 flex flex-row space-x-5 place-items-center">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 flex flex-row space-x-5 place-items-center">
           <Link to='/forgot-password'>忘记密码</Link>
           <span className="text-[var(--ion-color-medium)]">|</span>
-          <Link to='register'>注册账号</Link>
+          <Link to='register'>注册</Link>
+        </div>
+        <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex flex-row space-x-5 place-items-center">
+          <Link to='/debug'>调试</Link>
         </div>
       </IonContent>
     </IonPage>

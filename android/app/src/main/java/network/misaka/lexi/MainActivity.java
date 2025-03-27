@@ -1,4 +1,4 @@
-package ionic.teio;
+package network.misaka.lexi;
 
 import com.getcapacitor.BridgeActivity;
 

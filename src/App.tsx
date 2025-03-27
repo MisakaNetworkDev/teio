@@ -41,8 +41,11 @@ import './theme/variables.css';
 
 /* Tailwind */
 import './tailwind.css';
-import QuizPage from './pages/quizs/WordQuizPage';
-import FillBlankQuizPage from './views/challenges/ClozeChallenge';
+import WordBookSelectionPage from './pages/settings/WordBookSelectionPage';
+import StudySessionPage from './pages/study_session/StudySessionPage';
+import DebugPage from './pages/DebugPage';
+import WordQuizPage from './pages/study_session/WordQuizPage';
+import AiPostDetail from './pages/AiPostDetail';
 
 setupIonicReact({
   mode: 'ios',
@@ -56,12 +59,18 @@ const App: React.FC = () => (
         <Route exact path="/login">
           <LoginPage />
         </Route>
-        <Route exact path="/quiz/:quizSessionId">
-          <QuizPage />
+        <Route exact path="/study-session">
+          <StudySessionPage />
         </Route>
-        <Route exact path="/cloze">
-          <FillBlankQuizPage />
+
+        {/* debug */}
+        <Route exact path="/debug">
+          <DebugPage />
         </Route>
+        <Route path="/debug/word-quiz">
+          <WordQuizPage onFinished={() => { }} />
+        </Route>
+
         <Route exact path="/">
           <Redirect to="/tabbed/learn" />
         </Route>
@@ -74,19 +83,21 @@ const App: React.FC = () => (
             <Route exact path="/tabbed/user" component={UserTab} />
             <Route exact path="/tabbed/community" component={CommunityTab} />
             <Route exact path="/tabbed/article/:id" component={PostDetail} />
+            <Route exact path="/tabbed/ai-article/:id" component={AiPostDetail} />
             <Route exact path="/tabbed/settings/profile" component={SettingsProfile} />
+            <Route exact path="/tabbed/settings/word-book-selection" component={WordBookSelectionPage} />
           </IonRouterOutlet>
           <IonTabBar translucent slot="bottom" className='pb-8 csspt-1'>
             <IonTabButton tab="learn-tab" href="/tabbed/learn">
-              <IonIcon aria-hidden="true" icon={bookOutline} />
+              <IonIcon icon={bookOutline} />
               <IonLabel>学习</IonLabel>
             </IonTabButton>
             <IonTabButton tab="community-tab" href="/tabbed/community">
-              <IonIcon aria-hidden="true" icon={chatbubblesOutline} />
+              <IonIcon icon={chatbubblesOutline} />
               <IonLabel>社区</IonLabel>
             </IonTabButton>
             <IonTabButton tab='user-tab' href='/tabbed/user'>
-              <IonIcon aria-hidden="true" icon={personOutline} />
+              <IonIcon icon={personOutline} />
               <IonLabel>我</IonLabel>
             </IonTabButton>
           </IonTabBar>

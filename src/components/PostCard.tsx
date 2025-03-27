@@ -1,8 +1,8 @@
 import { Vibrant, WorkerPipeline } from "node-vibrant/worker";
 import PipelineWorker from "node-vibrant/worker.worker?worker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import clsx from 'clsx';
-import { useIonRouter, useIonViewWillEnter } from "@ionic/react";
+import { useIonRouter } from "@ionic/react";
 
 interface PostCardProps {
   tag?: string,
@@ -15,21 +15,30 @@ interface PostCardProps {
 }
 
 const PostCard: React.FC<PostCardProps> = (props: PostCardProps) => {
-  const [paletteColor, setPaletteColor] = useState<string>('');
+  const [mutedColor, setMutedColor] = useState<string>('');
   const [gradientStyle, setGradientStyle] = useState({});
 
   const ionRouter = useIonRouter();
 
   Vibrant.use(new WorkerPipeline(PipelineWorker as never));
-  useIonViewWillEnter(() => {
-    Vibrant.from(props.cover).getPalette().then(palette => {
-      const color = palette.Muted?.hex ?? '#FFFFFF';
-      setPaletteColor(color);
-      setGradientStyle({
-        background: `linear-gradient(to top, ${color}FF 36%, ${color}00 100%)`
+  useEffect(() => {
+    const doVibrantCalc = async () => {
+      const response = await fetch(props.cover);
+      if (!response.ok) {
+        throw new Error("图片获取失败");
+      }
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      Vibrant.from(objectUrl).getPalette().then(palette => {
+        const mutedColor = palette.Muted?.hex ?? '#FFFFFF';
+        setMutedColor(mutedColor);
+        setGradientStyle({
+          background: `linear-gradient(to top, ${mutedColor}FF 36%, ${mutedColor}00 100%)`
+        });
       });
-    });
-  })
+    };
+    doVibrantCalc();
+  }, [props.cover])
 
   const handleClick = () => {
     ionRouter.push(`/tabbed/article/${props.id}`, "forward");
@@ -37,11 +46,11 @@ const PostCard: React.FC<PostCardProps> = (props: PostCardProps) => {
 
   return (
     <div className={clsx(
-      "w-full bg-cover bg-center rounded-4xl drop-shadow-lg relative border-4 border-white",
+      "w-full bg-cover bg-center rounded-4xl drop-shadow-lg relative border-4 border-black transition-colors",
       props.className
-    )} style={{ backgroundImage: `url(${props.cover})`, borderColor: `${paletteColor}` }} onClick={handleClick}>
+    )} style={{ backgroundImage: `url(${props.cover})`, borderColor: `${mutedColor}` }} onClick={handleClick}>
       <div
-        className="absolute bottom-0 left-0 w-full h-72 rounded-b-3xl z-1 bg-linear-to-t"
+        className="absolute bottom-0 left-0 w-full h-72 rounded-b-3xl z-1 bg-linear-to-t from-black to-transparent"
         style={gradientStyle}
       />
       <div className="absolute bottom-6 left-0 w-full px-6 z-2">
@@ -56,7 +65,7 @@ const PostCard: React.FC<PostCardProps> = (props: PostCardProps) => {
       {props.ai &&
         <span
           className="absolute top-6 right-6 z-3 px-2 py-0.5 backdrop-blur-sm rounded-lg font-bold text-white"
-          style={{ backgroundColor: `${paletteColor}99` }}
+          style={{ backgroundColor: `${mutedColor}99` }}
         >
           AI CUSTOMIZED
         </span>

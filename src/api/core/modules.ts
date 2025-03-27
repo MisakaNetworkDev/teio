@@ -24,13 +24,13 @@ export abstract class SeiunModule {
     }
 
     // Post 方法
-    protected async post<T>(endpoint: string, body: any, options?: RequestOptions): Promise<T> {
+    protected async post<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
         const response = await this.client.post<T>(this.getFullUrl(endpoint), body, options, this.authFailedCallback);
         return response.data;
     }
 
     // Put 方法
-    protected async put<T>(endpoint: string, body: any, options?: RequestOptions): Promise<T> {
+    protected async put<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
         const response = await this.client.put<T>(this.getFullUrl(endpoint), body, options, this.authFailedCallback);
         return response.data;
     }
@@ -42,7 +42,7 @@ export abstract class SeiunModule {
     }
 
     // Patch 方法
-    protected async patch<T>(endpoint: string, body: any, options?: RequestOptions): Promise<T> {
+    protected async patch<T>(endpoint: string, body?: any, options?: RequestOptions): Promise<T> {
         const response = await this.client.patch<T>(this.getFullUrl(endpoint), body, options, this.authFailedCallback);
         return response.data;
     }

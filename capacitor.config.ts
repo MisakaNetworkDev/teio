@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'ionic.teio',
-  appName: 'teio',
+  appId: 'network.misaka.lexi',
+  appName: 'LEXI 乐词',
   webDir: 'dist',
   plugins: {
     CapacitorHttp: {

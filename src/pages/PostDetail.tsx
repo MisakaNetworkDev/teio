@@ -1,8 +1,10 @@
-import { IonBackButton, IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, useIonViewWillEnter } from '@ionic/react';
+import { IonBackButton, IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, useIonRouter, useIonViewWillEnter } from '@ionic/react';
 import { useState } from 'react';
-import example from '../mocks/example_post.json'
 import { useParams } from 'react-router';
 import Markdown from 'react-markdown'
+import { showTokenInfoMissingDialog } from '../utils/dialogs';
+import { ArticleModule, seiunClient } from '../api';
+import { resourceBaseUrl } from '../utils/url';
 
 interface PostDetailParams {
   id: string;
@@ -18,9 +20,24 @@ const PostDetail: React.FC = () => {
     tag: string,
   } | null>(null);
 
+  const ionRouter = useIonRouter();
+  const articleModule = new ArticleModule(seiunClient, async () => {
+    ionRouter.push('/login', 'root');
+    await showTokenInfoMissingDialog();
+  });
+
   useIonViewWillEnter(() => {
-    const articleData = example;
-    setArticle(articleData);
+    const fetchArticleData = async () => {
+      const postDetail = await articleModule.getArticleDetail(id);
+      setArticle({
+        id: id,
+        cover: resourceBaseUrl + "/article-image/" + postDetail.cover_file_name,
+        title: postDetail.title,
+        content: postDetail.article,
+        tag: "",
+      })
+    }
+    fetchArticleData();
   })
 
   return (
@@ -47,7 +64,7 @@ const PostDetail: React.FC = () => {
             </span>
           </div>
         </div>
-        <div className='bg-white p-6 pl-7 rounded-t-4xl'>
+        <div className='bg-white p-6 pl-7 rounded-4xl mb-4'>
           <Markdown>{article?.content}</Markdown>
         </div>
       </IonContent>

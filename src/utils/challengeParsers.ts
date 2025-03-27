@@ -1,7 +1,7 @@
 export interface ClozeTokens {
     type: 'text' | 'blank',
     content: string,
-    index?: string
+    index?: number
 }
 
 export function parseClozeTokens(content: string): ClozeTokens[] {
@@ -28,10 +28,11 @@ export function parseClozeTokens(content: string): ClozeTokens[] {
         }
 
         // 添加填空部分
+
         tokens.push({
             type: 'blank',
             content: match[0],
-            index: match[1]
+            index: parseInt(match[1]),
         });
 
         lastIndex = match.index + match[0].length;
