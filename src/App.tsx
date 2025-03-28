@@ -46,6 +46,7 @@ import StudySessionPage from './pages/study_session/StudySessionPage';
 import DebugPage from './pages/DebugPage';
 import WordQuizPage from './pages/study_session/WordQuizPage';
 import AiPostDetail from './pages/AiPostDetail';
+import MistakeBook from './pages/MistakeBookPage';
 
 setupIonicReact({
   mode: 'ios',
@@ -82,6 +83,7 @@ const App: React.FC = () => (
             <Route exact path="/tabbed/learn" component={LearnTab} />
             <Route exact path="/tabbed/user" component={UserTab} />
             <Route exact path="/tabbed/community" component={CommunityTab} />
+            <Route exact path="/tabbed/mistake-book" component={MistakeBook} />
             <Route exact path="/tabbed/article/:id" component={PostDetail} />
             <Route exact path="/tabbed/ai-article/:id" component={AiPostDetail} />
             <Route exact path="/tabbed/settings/profile" component={SettingsProfile} />

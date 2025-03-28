@@ -12,7 +12,7 @@ export class WordBookModule extends SeiunModule {
         return this.get<WordBookListData>('/books');
     }
 
-    async selectWordBook(wordBookId: string, dailyPlan: number = 10) {
+    async selectWordBook(wordBookId: string, dailyPlan: number = 5) {
         return this.post<void>('/select', {
             "word_book_id": wordBookId,
             "daily_plan": dailyPlan,

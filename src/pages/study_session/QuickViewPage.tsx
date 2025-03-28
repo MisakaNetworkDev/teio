@@ -1,31 +1,15 @@
-import { IonBackButton, IonButton, IonButtons, IonContent, IonHeader, IonItem, IonList, IonPage, IonTitle, IonToolbar } from "@ionic/react";
+import { IonBackButton, IonButton, IonButtons, IonContent, IonHeader, IonList, IonTitle, IonToolbar } from "@ionic/react";
 import { WordDetail } from "../../api/modules/study_session/types";
-
-
-interface WordItemProps {
-  definition: string;
-  pronunciation: string;
-  word_text: string;
-}
-const WordItem: React.FC<WordItemProps> = (props: WordItemProps) => {
-  return (
-    <IonItem>
-      <div className="flex flex-col py-2.5 px-1 space-y-1">
-        <p className="text-2xl font-bold text-[var(--ion-color-primary)]">{props.word_text}</p>
-        <p className="text-black/60">/{props.pronunciation}/</p>
-        <p className="whitespace-pre-wrap font-bold text-black/75">{props.definition}</p>
-      </div>
-    </IonItem>
-  )
-}
+import WordItem from "../../components/WordItem";
 
 interface QuickViewPageProps {
   wordList: WordDetail[];
   onStartQuiz: () => void;
 }
+
 const QuickViewPage: React.FC<QuickViewPageProps> = (props: QuickViewPageProps) => {
   return (
-    <IonPage>
+    <>
       <IonHeader translucent>
         <IonToolbar>
           <IonButtons slot="start">
@@ -53,7 +37,7 @@ const QuickViewPage: React.FC<QuickViewPageProps> = (props: QuickViewPageProps) 
           <IonButton expand="block" onClick={props.onStartQuiz}>开始巩固记忆</IonButton>
         </div>
       </IonContent>
-    </IonPage >
+    </>
   )
 }
 

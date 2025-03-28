@@ -22,26 +22,21 @@ const PostCard: React.FC<PostCardProps> = (props: PostCardProps) => {
 
   Vibrant.use(new WorkerPipeline(PipelineWorker as never));
   useEffect(() => {
-    const doVibrantCalc = async () => {
-      const response = await fetch(props.cover);
-      if (!response.ok) {
-        throw new Error("图片获取失败");
-      }
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      Vibrant.from(objectUrl).getPalette().then(palette => {
-        const mutedColor = palette.Muted?.hex ?? '#FFFFFF';
-        setMutedColor(mutedColor);
-        setGradientStyle({
-          background: `linear-gradient(to top, ${mutedColor}FF 36%, ${mutedColor}00 100%)`
-        });
+    Vibrant.from(props.cover).getPalette().then(palette => {
+      const mutedColor = palette.Muted?.hex ?? '#FFFFFF';
+      setMutedColor(mutedColor);
+      setGradientStyle({
+        background: `linear-gradient(to top, ${mutedColor}FF 36%, ${mutedColor}00 100%)`
       });
-    };
-    doVibrantCalc();
+    });
   }, [props.cover])
 
   const handleClick = () => {
-    ionRouter.push(`/tabbed/article/${props.id}`, "forward");
+    if (props.ai) {
+      ionRouter.push(`/tabbed/ai-article/${props.id}`, "forward");
+    } else {
+      ionRouter.push(`/tabbed/article/${props.id}`, "forward");
+    }
   };
 
   return (

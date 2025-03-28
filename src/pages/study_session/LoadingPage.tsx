@@ -1,8 +1,7 @@
-import { IonContent, IonPage } from "@ionic/react";
+import { IonContent } from "@ionic/react";
 
 const LoadingPage: React.FC = () => {
   return (
-    <IonPage>
       <IonContent scrollY={false} color="light" fullscreen className="ion-padding">
         <div className="grid place-items-center w-full h-full">
           <div className="w-2/3 space-y-8">
@@ -13,7 +12,6 @@ const LoadingPage: React.FC = () => {
           </div>
         </div>
       </IonContent>
-    </IonPage>
   )
 }
 

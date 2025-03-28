@@ -1,5 +1,5 @@
-import { IonButton, IonContent, IonIcon, IonPage, useIonRouter, useIonViewDidEnter, useIonViewWillEnter } from "@ionic/react";
-import { useRef, useState } from "react";
+import { IonButton, IonContent, IonIcon, useIonRouter } from "@ionic/react";
+import { useEffect, useRef, useState } from "react";
 import { StudySessionModule } from "../../api/modules/study_session/module";
 import { showTokenInfoMissingDialog } from "../../utils/dialogs";
 import { seiunClient } from "../../api";
@@ -39,33 +39,37 @@ const WordQuizPage: React.FC<QuizPageProps> = (props: QuizPageProps) => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [currentQuiz, setCurrentQuiz] = useState<QuizDetail>({
     question: {
-      word: "hemisphere",
-      pronunciation: "ˈhɛmɪsfɪə"
+      word: "",
+      pronunciation: ""
     },
     options: [
       {
         id: "0",
-        definition: "n.零",
+        definition: "",
       },
       {
         id: "1",
-        definition: "n.发音",
+        definition: "",
       },
       {
         id: "2",
-        definition: "n.(地球的) 半球",
+        definition: "",
       },
       {
         id: "3",
-        definition: "v.提供"
+        definition: ""
       },
     ],
     answer: {
-      id: "2",
+      id: "-1",
     }
   });
 
-  const sound = useRef<Howl | null>(null);
+
+  const correctSound = useRef(new Howl({ src: ["/sfx/correct.mp3"] }));
+  const wrongSound = useRef(new Howl({ src: ["/sfx/wrong.mp3"] }));
+
+  const [sound, setSound] = useState<Howl | null>(null);
 
   const ionRouter = useIonRouter();
   const studySessionModule = new StudySessionModule(seiunClient, async () => {
@@ -88,16 +92,18 @@ const WordQuizPage: React.FC<QuizPageProps> = (props: QuizPageProps) => {
           options: shuffleArray(nextWord.options.map(opt => {
             return {
               id: opt.word_id,
-              definition: opt.definition,
+              definition: opt.primary_definition,
             }
           })),
           answer: {
             id: nextWord.answer.word_id,
           },
         });
-        sound.current = new Howl({
+        // init sounds
+        setSound(new Howl({
           src: [`${resourceBaseUrl}/word-audio/${question.word_id}.wav`],
-        });
+          autoplay: true,
+        }));
       } else {
         props.onFinished();
       }
@@ -111,17 +117,14 @@ const WordQuizPage: React.FC<QuizPageProps> = (props: QuizPageProps) => {
     }
   }
 
-  useIonViewWillEnter(() => {
+  useEffect(() => {
     fetchNextWord();
-  });
-
-  useIonViewDidEnter(() => {
-    playSound();
-  })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const playSound = () => {
-    if (sound.current !== null) {
-      sound.current.play();
+    if (sound !== null) {
+      sound.play();
     }
   }
 
@@ -138,6 +141,11 @@ const WordQuizPage: React.FC<QuizPageProps> = (props: QuizPageProps) => {
 
     // 判断答案是否正确
     const isCorrect = optionId === currentQuiz.answer.id;
+    if (isCorrect) {
+      correctSound.current.play();
+    } else {
+      wrongSound.current.play();
+    }
 
     // 1秒后重置按钮状态
     setTimeout(async () => {
@@ -168,7 +176,7 @@ const WordQuizPage: React.FC<QuizPageProps> = (props: QuizPageProps) => {
   };
 
   return (
-    <IonPage>
+    <>
       <IonContent scrollY={false} color="light" fullscreen className="ion-padding">
         <div className="grid place-items-center w-full h-full">
           <div className="flex flex-col place-items-center w-full">
@@ -193,7 +201,7 @@ const WordQuizPage: React.FC<QuizPageProps> = (props: QuizPageProps) => {
                     disabled={disableButtons}
                     onClick={() => handleOptionSelect(option.id)}
                   >
-                    <p className="font-normal whitespace-pre-wrap leading-5">{option.definition}</p>
+                    <p className="font-normal line-clamp-1 leading-5">{option.definition}</p>
                   </IonButton>
                 ))
               }
@@ -201,7 +209,7 @@ const WordQuizPage: React.FC<QuizPageProps> = (props: QuizPageProps) => {
           </div>
         </div>
       </IonContent>
-    </IonPage>
+    </>
   )
 }
 

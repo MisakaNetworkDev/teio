@@ -1,6 +1,6 @@
 import SeiunClient, { AuthFailedCallbackFunction } from "../../core/client";
 import { SeiunModule } from "../../core/modules";
-import { ArticleDetail, ArticleList } from "./types";
+import { AiArticleDetail, AiArticleList, ArticleDetail, ArticleList } from "./types";
 
 // 文章模块接口
 export class ArticleModule extends SeiunModule {
@@ -17,5 +17,13 @@ export class ArticleModule extends SeiunModule {
 
     async getArticleDetail(postId: string) {
         return this.get<ArticleDetail>(`/detail/${postId}`)
+    }
+
+    async getAiArticleList() {
+        return this.get<AiArticleList>('/ai-article-list')
+    }
+
+    async getAiArticleDetail(postId: string) {
+        return this.get<AiArticleDetail>(`/ai-article?aiArticleId=${postId}`)
     }
 }

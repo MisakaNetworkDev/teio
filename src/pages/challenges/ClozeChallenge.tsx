@@ -1,5 +1,5 @@
-import { IonBackButton, IonButton, IonButtons, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, useIonRouter, useIonViewWillEnter } from "@ionic/react";
-import { useRef, useState } from "react";
+import { IonBackButton, IonButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar, useIonRouter } from "@ionic/react";
+import { useEffect, useRef, useState } from "react";
 import ClozeBlank from "../../components/ClozeBlank";
 import { ClozeTokens, parseClozeTokens } from "../../utils/challengeParsers";
 import AnswerCard from "../../components/AnswerCard";
@@ -16,6 +16,7 @@ interface ClozeChallengeData {
   content: string;
   selections: { [key: number]: string[] };
   answers: { [key: number]: string };
+  analysis: { [key: string]: string };
 }
 
 type ClozeSelections = {
@@ -45,7 +46,7 @@ const ClozeChallenge: React.FC<ClozeChallengeProps> = (props: ClozeChallengeProp
     await showTokenInfoMissingDialog();
   });
 
-  useIonViewWillEnter(() => {
+  useEffect(() => {
     const fetchChallengeData = async () => {
       let clozeDetail: ClozeTestDetail | undefined = undefined;
       while (clozeDetail === undefined && retriesCounter.current <= MAX_RETRIES) {
@@ -83,7 +84,8 @@ const ClozeChallenge: React.FC<ClozeChallengeProps> = (props: ClozeChallengeProp
       setQuizData(clozeDetail);
     }
     fetchChallengeData();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.sessionId]);
 
   const handleAnswerChange = (index: number, selection: string) => {
     const thisSelection = { ...selections };
@@ -103,58 +105,59 @@ const ClozeChallenge: React.FC<ClozeChallengeProps> = (props: ClozeChallengeProp
         quizData === null && <LoadingPage />
       }
       {
-        quizData !== null && (<IonPage>
-          <IonHeader translucent={true}>
-            <IonToolbar>
-              <IonTitle>挑战: {(quizData.type == 1 ? "完形填空" : quizData.type)}</IonTitle>
-              <IonButtons slot="start">
-                <IonBackButton defaultHref="/tabbed/learn" disabled={!submitted} text="学习" />
-              </IonButtons>
-            </IonToolbar>
-          </IonHeader>
-          <IonContent ref={contentRef} color="light" fullscreen className="ion-padding">
-            <IonHeader collapse="condense">
-              <IonToolbar color='light'>
-                <IonTitle size="large">挑战: {(quizData.type == 1 ? "完形填空" : quizData.type)}</IonTitle>
+        quizData !== null && (
+          <>
+            <IonHeader translucent={true}>
+              <IonToolbar>
+                <IonTitle>挑战: 完形填空</IonTitle>
+                <IonButtons slot="start">
+                  <IonBackButton defaultHref="/tabbed/learn" disabled={!submitted} text="学习" />
+                </IonButtons>
               </IonToolbar>
             </IonHeader>
-            <div className="my-4">
-              <div className="text-lg leading-9 whitespace-pre-wrap">
-                {tokens.map((token, index) => (
-                  token.type === 'text' ?
-                    <span key={index} className="inline">{token.content}</span> :
-                    <ClozeBlank
-                      key={index}
-                      className="mx-1"
-                      index={token.index!}
-                      disabled={submitted}
-                      selections={quizData.selections[token.index!]}
-                      contentRef={contentRef}
-                      onSelectionChange={handleAnswerChange}
-                    />
-                ))}
+            <IonContent ref={contentRef} color="light" fullscreen className="ion-padding">
+              <IonHeader collapse="condense">
+                <IonToolbar color='light'>
+                  <IonTitle size="large">挑战: "完形填空</IonTitle>
+                </IonToolbar>
+              </IonHeader>
+              <div className="my-4">
+                <div className="text-lg leading-9 whitespace-pre-wrap">
+                  {tokens.map((token, index) => (
+                    token.type === 'text' ?
+                      <span key={index} className="inline">{token.content}</span> :
+                      <ClozeBlank
+                        key={index}
+                        className="mx-1"
+                        index={token.index!}
+                        disabled={submitted}
+                        selections={quizData.selections[token.index!]}
+                        contentRef={contentRef}
+                        onSelectionChange={handleAnswerChange}
+                      />
+                  ))}
+                </div>
               </div>
-            </div>
-            {
-              !submitted &&
-              <div className="mb-[100vh]">
-                <IonButton expand="block" disabled={!finished} onClick={handleSubmit}>提交答案</IonButton>
-              </div>
-            }
-            <div className="space-y-3">
               {
-                submitted && Object.keys(selections).map(blank => {
-                  const numberBlankIndex = parseInt(blank);
-                  return (
-                    <AnswerCard key={numberBlankIndex} index={blank} answer={selections[numberBlankIndex].answer} userSelection={selections[numberBlankIndex].userSelection!} />
-                  )
-                })
+                !submitted &&
+                <div className="mb-[100vh]">
+                  <IonButton expand="block" disabled={!finished} onClick={handleSubmit}>提交答案</IonButton>
+                </div>
               }
-            </div>
-          </IonContent>
-        </IonPage>)
+              <div className="space-y-3">
+                {
+                  submitted && Object.keys(selections).map(blank => {
+                    const numberBlankIndex = parseInt(blank);
+                    return (
+                      <AnswerCard key={numberBlankIndex} index={blank} answer={selections[numberBlankIndex].answer} userSelection={selections[numberBlankIndex].userSelection!} explanation={quizData.analysis[numberBlankIndex]} />
+                    )
+                  })
+                }
+              </div>
+            </IonContent>
+          </>
+        )
       }
-
     </>
   );
 }

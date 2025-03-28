@@ -1,5 +1,5 @@
-import { useIonRouter, useIonViewWillEnter } from "@ionic/react";
-import { useRef, useState } from "react";
+import { IonPage, useIonRouter, useIonViewWillEnter } from "@ionic/react";
+import { useState } from "react";
 import { showTokenInfoMissingDialog } from "../../utils/dialogs";
 import { StudySessionModule } from "../../api/modules/study_session/module";
 import { seiunClient } from "../../api";
@@ -11,16 +11,16 @@ import QuickViewPage from "./QuickViewPage";
 import WordQuizPage from "./WordQuizPage";
 import ClozeChallenge from "../challenges/ClozeChallenge";
 
-const StudySessionPage: React.FC = () => {
-  const isLoaded = useRef(false);
+const defaultStudySessionDetail = {
+  reviewing_word_count: 0,
+  studying_word_count: 0,
+  session_id: "",
+  words: [],
+};
 
+const StudySessionPage: React.FC = () => {
   const [sessionStage, setSessionStage] = useState<"loading" | "quick-view" | "word-quiz" | "challenge">("loading");
-  const [studySessionDetail, setStudySessionDetail] = useState<WordSessionDetail>({
-    reviewing_word_count: 0,
-    studying_word_count: 0,
-    session_id: "",
-    words: [],
-  });
+  const [studySessionDetail, setStudySessionDetail] = useState<WordSessionDetail>(defaultStudySessionDetail);
 
   const ionRouter = useIonRouter();
   const studySessionModule = new StudySessionModule(seiunClient, async () => {
@@ -29,24 +29,23 @@ const StudySessionPage: React.FC = () => {
   });
 
   useIonViewWillEnter(() => {
-    const initStudySession = async () => {
-      try {
-        const sessionDetail = await studySessionModule.initStudySession();
-        setStudySessionDetail(sessionDetail);
-        console.log(sessionDetail);
-        setSessionStage("quick-view");
-      } catch (err) {
-        if (err instanceof AuthError) return;
-        await Dialog.alert({
-          title: "初始化失败",
-          message: (err as RequestError).message,
-        });
-        return;
+    if (sessionStage === 'loading') {
+      const initStudySession = async () => {
+        try {
+          const sessionDetail = await studySessionModule.initStudySession();
+          setSessionStage("quick-view");
+          setStudySessionDetail(sessionDetail);
+          console.log(sessionDetail);
+        } catch (err) {
+          if (err instanceof AuthError) return;
+          await Dialog.alert({
+            title: "初始化失败",
+            message: (err as RequestError).message,
+          });
+          return;
+        }
       }
-    }
-    if (!isLoaded.current) {
       initStudySession();
-      isLoaded.current = true;
     }
   })
 
@@ -59,7 +58,7 @@ const StudySessionPage: React.FC = () => {
   }
 
   return (
-    <>
+    <IonPage>
       {
         sessionStage === "loading" && <LoadingPage />
       }
@@ -72,7 +71,7 @@ const StudySessionPage: React.FC = () => {
       {
         sessionStage === "challenge" && <ClozeChallenge sessionId={studySessionDetail.session_id} />
       }
-    </>
+    </IonPage>
   )
 }
 

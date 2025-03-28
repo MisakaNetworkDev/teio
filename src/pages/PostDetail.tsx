@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router';
 import Markdown from 'react-markdown'
 import { showTokenInfoMissingDialog } from '../utils/dialogs';
-import { ArticleModule, seiunClient } from '../api';
+import { ArticleModule, seiunClient, UserModule } from '../api';
 import { resourceBaseUrl } from '../utils/url';
 
 interface PostDetailParams {
@@ -19,9 +19,14 @@ const PostDetail: React.FC = () => {
     content: string,
     tag: string,
   } | null>(null);
+  const [authorName, setAuthorName] = useState<string>("");
 
   const ionRouter = useIonRouter();
   const articleModule = new ArticleModule(seiunClient, async () => {
+    ionRouter.push('/login', 'root');
+    await showTokenInfoMissingDialog();
+  });
+  const userModule = new UserModule(seiunClient, async () => {
     ionRouter.push('/login', 'root');
     await showTokenInfoMissingDialog();
   });
@@ -33,9 +38,11 @@ const PostDetail: React.FC = () => {
         id: id,
         cover: resourceBaseUrl + "/article-image/" + postDetail.cover_file_name,
         title: postDetail.title,
-        content: postDetail.article,
+        content: postDetail.content,
         tag: "",
-      })
+      });
+      const authorInfo = await userModule.getUserProfile(postDetail.creator_id);
+      setAuthorName(authorInfo.nick_name)
     }
     fetchArticleData();
   })
@@ -60,7 +67,7 @@ const PostDetail: React.FC = () => {
           <div className='flex flex-row'>
             <span className='flex flex-row w-full justify-end items-center space-x-2'>
               <img className='rounded-full w-8 h-8' src="/avatars/default.png" alt="avatar" />
-              <p>DeepSeek V3</p>
+              <p>{authorName}</p>
             </span>
           </div>
         </div>

@@ -1,8 +1,7 @@
-import { IonContent, IonHeader, IonPage, IonRippleEffect, IonTitle, IonToolbar, useIonRouter, useIonViewWillEnter } from "@ionic/react"
+import { IonContent, IonHeader, IonPage, IonRefresher, IonRefresherContent, IonRippleEffect, IonSkeletonText, IonTitle, IonToolbar, useIonRouter, useIonViewWillEnter } from "@ionic/react"
 import { Swiper, SwiperSlide } from 'swiper/react';
 import PostCard from "../components/PostCard";
 import { useState } from "react";
-import exmaplePosts from '../mocks/example_post.json'
 import { ArticleModule, seiunClient } from "../api";
 import 'swiper/css';
 import { showTokenInfoMissingDialog } from "../utils/dialogs";
@@ -17,6 +16,10 @@ interface PostDetail {
   cover: string,
 }
 
+interface AiPostDetail extends PostDetail {
+  tag: string;
+}
+
 const CommunityTab: React.FC = () => {
   const ionRouter = useIonRouter();
   const articleModule = new ArticleModule(seiunClient, async () => {
@@ -24,26 +27,53 @@ const CommunityTab: React.FC = () => {
     await showTokenInfoMissingDialog();
   });
 
-  const [aiPosts, setAiPosts] = useState(exmaplePosts);
+  const [aiPosts, setAiPosts] = useState<AiPostDetail[]>([]);
   const [posts, setPosts] = useState<PostDetail[]>([]);
 
+  const fetchArticles = async () => {
+    const articles = await articleModule.getArticleList();
+    const articleDetails = await Promise.all(articles.article_ids?.map(async id => {
+      const post = await articleModule.getArticleDetail(id);
+      return {
+        id: post.id,
+        title: post.title,
+        desc: post.description,
+        content: post.content,
+        cover: resourceBaseUrl + "/article-image/" + post.cover_file_name
+      };
+    }));
+    return articleDetails;
+  };
+
+  const fetchAiArticles = async () => {
+    const articles = await articleModule.getAiArticleList();
+    const articleDetails = await Promise.all(articles.ai_article_ids?.map(async id => {
+      const post = await articleModule.getAiArticleDetail(id);
+      return {
+        id: post.ai_article_id,
+        content: post.content,
+        title: post.title,
+        desc: post.description,
+        cover: resourceBaseUrl + "/article-image/" + post.cover_file_name,
+        tag: post.tag
+      };
+    }));
+    return articleDetails;
+  };
+
+  const fetchData = async () => {
+    const [articleDetails, aiArticleDetails] = await Promise.all([fetchArticles(), fetchAiArticles()]);
+    setPosts(articleDetails);
+    setAiPosts(aiArticleDetails);
+  };
+
+  const doRefresh = async (event: CustomEvent) => {
+    await fetchData();
+    event.detail.complete();
+  }
+
   useIonViewWillEnter(() => {
-    const fetchPosts = async () => {
-      const articles = await articleModule.getArticleList();
-      const articleDetails = await Promise.all(articles.article_ids?.map(id => {
-        return articleModule.getArticleDetail(id);
-      }));
-      setPosts(articleDetails.map(post => {
-        return {
-          id: post.id,
-          title: post.title,
-          desc: post.description,
-          content: post.article,
-          cover: resourceBaseUrl + "/article-image/" + post.cover_file_name
-        }
-      }))
-    }
-    fetchPosts()
+    fetchData();
   })
 
   return (
@@ -54,6 +84,9 @@ const CommunityTab: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent color='light' fullscreen>
+        <IonRefresher slot="fixed" onIonRefresh={doRefresh}>
+          <IonRefresherContent />
+        </IonRefresher>
         <div className='ion-padding !pt-0'>
           <IonHeader color='light' collapse="condense">
             <IonToolbar color='light'>
@@ -74,6 +107,9 @@ const CommunityTab: React.FC = () => {
             slidesOffsetAfter={16}
             slidesOffsetBefore={16}
           >
+            {
+              aiPosts.length === 0 && <IonSkeletonText animated={true} style={{ height: '28rem', width: '85%', borderRadius: '2rem', marginLeft: '1rem' }}></IonSkeletonText>
+            }
             {
               aiPosts.map((post, index) => (
                 <SwiperSlide key={index} className="!w-[85%] ion-activatable rounded-4xl relative overflow-hidden">
@@ -98,7 +134,10 @@ const CommunityTab: React.FC = () => {
             <p className="text-xl font-semibold">为您推荐</p>
             <p className="text-black/50 font-semibold">社区中当前的热门文章</p>
           </div>
-          <div className="mt-4 flex flex-col">
+          <div className="flex flex-col">
+            {
+              posts.length === 0 && <IonSkeletonText animated={true} style={{ height: '20rem', borderRadius: '2rem', marginTop: '1rem'}}></IonSkeletonText>
+            }
             {
               posts.map((post, index) => (
                 <SwiperSlide key={index} className="ion-activatable rounded-4xl relative overflow-hidden mt-4">

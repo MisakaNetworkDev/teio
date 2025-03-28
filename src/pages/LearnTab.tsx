@@ -1,4 +1,4 @@
-import { IonContent, IonHeader, IonNavLink, IonPage, IonProgressBar, IonTitle, IonToolbar, IonRippleEffect, IonButton, useIonRouter, useIonViewWillEnter } from "@ionic/react"
+import { IonContent, IonHeader, IonPage, IonProgressBar, IonTitle, IonToolbar, IonRippleEffect, IonButton, useIonRouter, useIonViewWillEnter } from "@ionic/react"
 
 import { Icon } from "@iconify/react";
 import { CurrentPlanData, seiunClient, UserPlanModule } from "../api";
@@ -11,11 +11,11 @@ interface FunctionCardProps {
   title: string,
   subTitle: string,
   icon: string,
-  component: React.FC
+  to: string,
 }
 const FunctionCard: React.FC<FunctionCardProps> = (props: FunctionCardProps) => {
   return (
-    <IonNavLink routerDirection="forward" component={() => props.component}>
+    <Link to={props.to}>
       <div className="bg-white rounded-2xl p-4 flex flex-row items-center ion-activatable relative overflow-hidden">
         <Icon icon={props.icon} className="text-[var(--ion-color-primary)]" height={48} />
         <div className="flex flex-col grow mx-4">
@@ -25,7 +25,7 @@ const FunctionCard: React.FC<FunctionCardProps> = (props: FunctionCardProps) => 
         <Icon icon="mingcute:right-line" className="text-black/75 ml-3" height={24} />
         <IonRippleEffect />
       </div>
-    </IonNavLink>
+    </Link>
   )
 }
 
@@ -127,10 +127,10 @@ const LearnTab: React.FC = () => {
           </div>
 
           <div className="mt-4 flex flex-col space-y-4">
-            <FunctionCard title="听力练习" subTitle="AI 语音包功能上线" icon="ph:headphones-light" component={() => <div></div>} />
-            <FunctionCard title="错题本" subTitle="查看往日错题" icon="material-symbols-light:book-outline" component={() => <div></div>} />
-            <FunctionCard title="首字母填空" subTitle="AI 智能出题" icon="material-symbols-light:ink-pen-outline-rounded" component={() => <div></div>} />
-            <FunctionCard title="作业批改" subTitle="AI 智能整理知识点" icon="material-symbols-light:scan-outline-rounded" component={() => <div></div>} />
+            <FunctionCard title="听力练习" subTitle="AI 语音包功能上线" icon="ph:headphones-light" to="#" />
+            <FunctionCard title="错题本" subTitle="查看往日错题" icon="material-symbols-light:book-outline" to="/tabbed/mistake-book" />
+            <FunctionCard title="首字母填空" subTitle="AI 智能出题" icon="material-symbols-light:ink-pen-outline-rounded" to="#" />
+            <FunctionCard title="作业批改" subTitle="AI 智能整理知识点" icon="material-symbols-light:scan-outline-rounded" to="#" />
           </div>
         </div>
       </IonContent>

@@ -18,6 +18,7 @@ const AiPostDetail: React.FC = () => {
     title: string,
     content: string,
     tag: string,
+    vocabulary: string
   } | null>(null);
 
   const ionRouter = useIonRouter();
@@ -28,13 +29,14 @@ const AiPostDetail: React.FC = () => {
 
   useIonViewWillEnter(() => {
     const fetchArticleData = async () => {
-      const postDetail = await articleModule.getArticleDetail(id);
+      const postDetail = await articleModule.getAiArticleDetail(id);
       setArticle({
         id: id,
         cover: resourceBaseUrl + "/article-image/" + postDetail.cover_file_name,
         title: postDetail.title,
-        content: postDetail.article,
-        tag: "",
+        content: postDetail.content,
+        tag: postDetail.tag,
+        vocabulary: postDetail.vocabulary
       })
     }
     fetchArticleData();
@@ -66,6 +68,8 @@ const AiPostDetail: React.FC = () => {
         </div>
         <div className='bg-white p-6 pl-7 rounded-4xl mb-4'>
           <Markdown>{article?.content}</Markdown>
+          <Markdown>### 关键词语释义</Markdown>
+          <Markdown>{article?.vocabulary}</Markdown>
         </div>
       </IonContent>
     </IonPage>

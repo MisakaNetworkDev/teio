@@ -32,6 +32,7 @@ export interface ClozeTestResp {
  * ClozeTestDetail
  */
 export interface ClozeTestDetail {
+    analysis: { [key: string]: string };
     answers: { [key: string]: string };
     content: string;
     selections: { [key: string]: string[] };

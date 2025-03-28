@@ -27,19 +27,11 @@ export interface WordDetail {
 }
 
 /**
- * GetNextWordResp
- */
-export interface GetNextWordResp {
-    code: number;
-    data?: NextWordDetail;
-    message: string;
-}
-
-/**
  * NextWordDetail
  */
 export interface NextWordDetail {
     answer: AnswerDetail;
+    example_sentence: string;
     options: OptionDetail[];
     reviewing_word_count: number;
     studying_word_count: number;
@@ -58,6 +50,7 @@ export interface AnswerDetail {
  */
 export interface OptionDetail {
     definition: string;
+    primary_definition: string;
     pronunciation: string;
     word: string;
     word_id: string;

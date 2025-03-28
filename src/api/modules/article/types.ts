@@ -18,14 +18,34 @@ export interface ArticleList {
  * ArticleDetail
  */
 export interface ArticleDetail {
-    article: string;
+    content: string;
     article_img_urls: string[];
     cover_file_name: string;
-    create_at: Date;
+    create_at: number;
     creator_id: string;
     description: string;
     id: string;
     is_pinned: boolean;
     like: number;
     title: string;
+}
+
+/**
+ * AiArticleDetail
+ */
+export interface AiArticleDetail {
+    ai_article_id: string;
+    content: string;
+    cover_file_name: string;
+    description: string;
+    tag: string;
+    title: string;
+    vocabulary: string;
+}
+
+/**
+ * AiArticleList
+ */
+export interface AiArticleList {
+    ai_article_ids: string[];
 }
