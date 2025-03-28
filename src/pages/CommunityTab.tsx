@@ -1,7 +1,7 @@
 import { IonContent, IonHeader, IonPage, IonRefresher, IonRefresherContent, IonRippleEffect, IonSkeletonText, IonTitle, IonToolbar, useIonRouter, useIonViewWillEnter } from "@ionic/react"
 import { Swiper, SwiperSlide } from 'swiper/react';
 import PostCard from "../components/PostCard";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArticleModule, seiunClient } from "../api";
 import 'swiper/css';
 import { showTokenInfoMissingDialog } from "../utils/dialogs";
@@ -29,6 +29,7 @@ const CommunityTab: React.FC = () => {
 
   const [aiPosts, setAiPosts] = useState<AiPostDetail[]>([]);
   const [posts, setPosts] = useState<PostDetail[]>([]);
+  const loaded = useRef(false);
 
   const fetchArticles = async () => {
     const articles = await articleModule.getArticleList();
@@ -62,7 +63,9 @@ const CommunityTab: React.FC = () => {
   };
 
   const fetchData = async () => {
+    loaded.current = false;
     const [articleDetails, aiArticleDetails] = await Promise.all([fetchArticles(), fetchAiArticles()]);
+    loaded.current = true;
     setPosts(articleDetails);
     setAiPosts(aiArticleDetails);
   };
@@ -94,10 +97,12 @@ const CommunityTab: React.FC = () => {
             </IonToolbar>
           </IonHeader>
 
-          <div className="mt-2 ml-[2px]">
-            <p className="text-xl font-semibold">AI 内容专区</p>
-            <p className="text-black/50 font-semibold">根据您学习记录自动生成的巩固阅读材料</p>
-          </div>
+          {
+            !loaded.current || aiPosts.length !== 0 && <div className="mt-2 ml-[2px]">
+              <p className="text-xl font-semibold">AI 内容专区</p>
+              <p className="text-black/50 font-semibold">根据您学习记录自动生成的巩固阅读材料</p>
+            </div>
+          }
         </div>
         <div>
           <Swiper
@@ -108,7 +113,7 @@ const CommunityTab: React.FC = () => {
             slidesOffsetBefore={16}
           >
             {
-              aiPosts.length === 0 && <IonSkeletonText animated={true} style={{ height: '28rem', width: '85%', borderRadius: '2rem', marginLeft: '1rem' }}></IonSkeletonText>
+              !loaded.current && <IonSkeletonText animated={true} style={{ height: '28rem', width: '85%', borderRadius: '2rem', marginLeft: '1rem' }}></IonSkeletonText>
             }
             {
               aiPosts.map((post, index) => (
@@ -136,7 +141,7 @@ const CommunityTab: React.FC = () => {
           </div>
           <div className="flex flex-col">
             {
-              posts.length === 0 && <IonSkeletonText animated={true} style={{ height: '20rem', borderRadius: '2rem', marginTop: '1rem'}}></IonSkeletonText>
+              !loaded.current && <IonSkeletonText animated={true} style={{ height: '20rem', borderRadius: '2rem', marginTop: '1rem' }}></IonSkeletonText>
             }
             {
               posts.map((post, index) => (

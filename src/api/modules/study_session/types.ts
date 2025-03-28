@@ -24,6 +24,7 @@ export interface WordDetail {
     definition: string;
     pronunciation: string;
     word_text: string;
+    example_sentence: string;
 }
 
 /**

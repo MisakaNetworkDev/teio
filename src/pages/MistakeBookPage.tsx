@@ -42,7 +42,13 @@ const MistakeBook: React.FC = () => {
         <IonList inset>
           {
             wordList.map(word => (
-              <WordItem key={word.word_text} word_text={word.word_text} pronunciation={word.pronunciation} definition={word.definition} />
+              <WordItem
+                key={word.word_text}
+                word_text={word.word_text}
+                pronunciation={word.pronunciation}
+                definition={word.definition}
+                example={word.example_sentence}
+              />
             ))
           }
         </IonList>
