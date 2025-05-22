@@ -13,7 +13,7 @@ const WordItem: React.FC<WordItemProps> = (props: WordItemProps) => {
         <p className="text-2xl font-bold text-[var(--ion-color-primary)]">{props.word_text}</p>
         <p className="text-black/60">/{props.pronunciation}/</p>
         <p className="whitespace-pre-wrap font-bold text-black/75">{props.definition}</p>
-        <p className="whitespace-pre-wrap">{props.example}</p>
+        <p className="whitespace-pre-wrap">例句: {props.example}</p>
       </div>
     </IonItem>
   )

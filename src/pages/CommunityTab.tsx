@@ -64,10 +64,14 @@ const CommunityTab: React.FC = () => {
 
   const fetchData = async () => {
     loaded.current = false;
-    const [articleDetails, aiArticleDetails] = await Promise.all([fetchArticles(), fetchAiArticles()]);
+    const [articleDetails, aiArticleDetails] = await Promise.allSettled([fetchArticles(), fetchAiArticles()]);
     loaded.current = true;
-    setPosts(articleDetails);
-    setAiPosts(aiArticleDetails);
+    if (articleDetails.status === 'fulfilled') {
+      setPosts(articleDetails.value);
+    }
+    if (aiArticleDetails.status === 'fulfilled') {
+      setAiPosts(aiArticleDetails.value);
+    }
   };
 
   const doRefresh = async (event: CustomEvent) => {
